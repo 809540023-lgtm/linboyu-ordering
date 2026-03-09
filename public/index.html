@@ -802,6 +802,213 @@
             border-left: 4px solid #e74c3c;
         }
 
+        /* Login Modal Styles */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .login-modal.hidden {
+            display: none;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #2d7d46 0%, #e67e22 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .login-tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+        }
+
+        .login-tab.active {
+            color: #2d7d46;
+            border-bottom-color: #2d7d46;
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #2d7d46;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #2d7d46 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 125, 70, 0.3);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .google-login-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .google-login-btn:hover {
+            border-color: #ddd;
+            background: #f9f9f9;
+        }
+
+        .login-divider {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .login-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .login-divider span {
+            position: relative;
+            background: white;
+            padding: 0 8px;
+            z-index: 2;
+        }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: -12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .header-user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
         @media (max-width: 768px) {
             .brand-selector {
                 grid-template-columns: 1fr;
@@ -815,6 +1022,10 @@
             .payment-methods {
                 grid-template-columns: 1fr;
             }
+
+            .login-container {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
@@ -822,6 +1033,10 @@
     <header>
         <div class="header-content">
             <div class="logo">🍽️ 健康飲食訂餐</div>
+            <div class="header-user-section" id="headerUserSection" style="display: none;">
+                <div class="user-name" id="headerUserName"></div>
+                <button class="logout-btn" id="logoutBtn">登出</button>
+            </div>
             <div class="cart-icon" id="cartIcon">
                 🛒
                 <div class="cart-count" id="cartCount">0</div>
@@ -833,7 +1048,7 @@
         <!-- Brand Selector -->
         <div class="brand-selector" id="brandSelector">
             <button class="brand-btn green active" data-brand="fithouse">
-                🥗 纖體食驗室<br><span style="font-size: 12px; opacity: 0.8;">外送配送 +30元</span>
+                🥗 纖體食驗室<br><span style="font-size: 12px; opacity: 0.8;">雲端廚房</span>
             </button>
             <button class="brand-btn orange" data-brand="linboyuai">
                 🍱 林博御AI膳<br><span style="font-size: 12px; opacity: 0.8;">門市自取</span>
@@ -896,12 +1111,6 @@
                     <div class="form-error" id="emailError"></div>
                 </div>
 
-                <div class="form-group" id="deliveryAddressGroup" style="display: none;">
-                    <label class="form-label">外送地址 *</label>
-                    <input type="text" class="form-input" id="deliveryAddress" placeholder="請輸入完整地址">
-                    <div class="form-error" id="addressError"></div>
-                </div>
-
                 <div class="order-summary-modal" id="orderSummary"></div>
 
                 <div class="form-group">
@@ -933,6 +1142,49 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-container">
+            <div class="login-title">🍽️ 訂餐系統</div>
+            <div class="login-subtitle">歡迎登錄</div>
+
+            <!-- Tabs -->
+            <div class="login-tabs">
+                <button class="login-tab active" data-tab="login-form">登錄</button>
+                <button class="login-tab" data-tab="register-form">註冊</button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="login-form active" id="loginForm" data-form="login-form">
+                <button type="button" class="google-login-btn" id="googleLoginBtn">
+                    <span>🔵</span> 使用 Google 登錄
+                </button>
+
+                <div class="login-divider">
+                    <span>或</span>
+                </div>
+
+                <input type="text" class="login-input" id="loginPhone" placeholder="電話號碼" required>
+                <input type="password" class="login-input" id="loginPassword" placeholder="密碼" required>
+                <div class="login-error" id="loginError"></div>
+                <button type="submit" class="login-button" id="loginSubmitBtn">登錄</button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="login-form" id="registerForm" data-form="register-form">
+                <input type="text" class="login-input" id="registerName" placeholder="姓名" required>
+                <input type="tel" class="login-input" id="registerPhone" placeholder="電話號碼" required>
+                <input type="email" class="login-input" id="registerEmail" placeholder="Email" required>
+                <input type="password" class="login-input" id="registerPassword" placeholder="密碼" required>
+                <div class="login-error" id="registerError"></div>
+                <button type="submit" class="login-button" id="registerSubmitBtn">註冊</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google Sign-In Script -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
         // Application State
         let appState = {
@@ -950,8 +1202,8 @@
             fithouse: {
                 name: '纖體食驗室',
                 color: '#2d7d46',
-                delivery: true,
-                deliveryFee: 30,
+                delivery: false,
+                deliveryFee: 0,
                 buttonClass: 'green'
             },
             linboyuai: {
@@ -965,10 +1217,12 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            checkUserLogin();
             setupBrandSelector();
             setupCalendar();
             setupPaymentMethods();
             setupEventListeners();
+            setupLoginSystem();
             fetchProducts();
             setTodayAsSelected();
         });
@@ -1225,8 +1479,7 @@
                 discountAmount += appState.discountAmount;
             }
 
-            const deliveryFee = config.delivery ? config.deliveryFee : 0;
-            const total = subtotal - discountAmount + deliveryFee;
+            const total = subtotal - discountAmount;
 
             html += `
                 <div class="summary-row subtotal">
@@ -1240,15 +1493,6 @@
                     <div class="summary-row discount">
                         <span>優惠</span>
                         <span>-NT$${discountAmount}</span>
-                    </div>
-                `;
-            }
-
-            if (deliveryFee > 0) {
-                html += `
-                    <div class="summary-row">
-                        <span>外送費</span>
-                        <span>+NT$${deliveryFee}</span>
                     </div>
                 `;
             }
@@ -1336,8 +1580,7 @@
 
             const discount = getDiscount(getDaysAhead(appState.selectedDate));
             const discountAmount = Math.round(subtotal * (1 - discount));
-            const deliveryFee = config.delivery ? config.deliveryFee : 0;
-            const total = subtotal - discountAmount + deliveryFee;
+            const total = subtotal - discountAmount;
 
             const dateObj = new Date(appState.selectedDate);
             const dateStr = dateObj.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' });
@@ -1351,7 +1594,6 @@
                 <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;">
                     <div><strong>小計:</strong> NT$${subtotal}</div>
                     ${discountAmount > 0 ? `<div><strong style="color: #27ae60;">優惠:</strong> -NT$${discountAmount}</div>` : ''}
-                    ${deliveryFee > 0 ? `<div><strong>外送費:</strong> +NT$${deliveryFee}</div>` : ''}
                     <div style="font-size: 16px; font-weight: 700; color: #e67e22; margin-top: 8px;">
                         <strong>合計: NT$${total}</strong>
                     </div>
@@ -1360,18 +1602,7 @@
         }
 
         function updateDeliveryAddressVisibility() {
-            const config = BRAND_CONFIG[appState.selectedBrand];
-            const group = document.getElementById('deliveryAddressGroup');
-            const input = document.getElementById('deliveryAddress');
-            const storeInfo = document.getElementById('deliveryAddressGroup');
-
-            if (config.delivery) {
-                group.style.display = 'block';
-                input.required = true;
-            } else {
-                group.style.display = 'none';
-                input.required = false;
-            }
+            // Delivery address not needed - both brands use delivery: false
         }
 
         function setupPaymentMethods() {
@@ -1445,7 +1676,6 @@
             const name = document.getElementById('customerName').value.trim();
             const phone = document.getElementById('customerPhone').value.trim();
             const email = document.getElementById('customerEmail').value.trim();
-            const address = document.getElementById('deliveryAddress').value.trim();
 
             // Validation
             if (!name) {
@@ -1458,12 +1688,6 @@
             }
             if (!email) {
                 document.getElementById('emailError').textContent = '請輸入Email';
-                return;
-            }
-
-            const config = BRAND_CONFIG[appState.selectedBrand];
-            if (config.delivery && !address) {
-                document.getElementById('addressError').textContent = '請輸入外送地址';
                 return;
             }
 
@@ -1489,8 +1713,7 @@
             });
 
             const discountAmount = Math.round(subtotal * (1 - discount)) + appState.discountAmount;
-            const deliveryFee = config.delivery ? config.deliveryFee : 0;
-            const total = subtotal - discountAmount + deliveryFee;
+            const total = subtotal - discountAmount;
 
             const orderData = {
                 brand: appState.selectedBrand,
@@ -1499,13 +1722,11 @@
                 customer: {
                     name,
                     phone,
-                    email,
-                    deliveryAddress: address || null
+                    email
                 },
                 discountCode: appState.discountCode || null,
                 subtotal,
                 discount: discountAmount,
-                deliveryFee,
                 total,
                 paymentMethod: appState.selectedPaymentMethod
             };
@@ -1562,6 +1783,255 @@
                 toast.style.animation = 'slideInRight 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        // ===== Login System =====
+
+        function checkUserLogin() {
+            const user = localStorage.getItem('linboyu_user');
+            const loginModal = document.getElementById('loginModal');
+            const main = document.querySelector('.container');
+
+            if (user) {
+                // User is logged in
+                loginModal.classList.add('hidden');
+                updateHeaderWithUser(JSON.parse(user));
+                prefillUserInfo(JSON.parse(user));
+            } else {
+                // User not logged in
+                loginModal.classList.remove('hidden');
+                main.style.display = 'none';
+                document.querySelector('header').style.display = 'none';
+            }
+        }
+
+        function updateHeaderWithUser(user) {
+            const headerUserSection = document.getElementById('headerUserSection');
+            const headerUserName = document.getElementById('headerUserName');
+
+            if (headerUserSection) {
+                headerUserSection.style.display = 'flex';
+                headerUserName.textContent = `👤 ${user.name}`;
+            }
+        }
+
+        function prefillUserInfo(user) {
+            const nameInput = document.getElementById('customerName');
+            const phoneInput = document.getElementById('customerPhone');
+
+            if (nameInput) nameInput.value = user.name;
+            if (phoneInput) phoneInput.value = user.phone;
+        }
+
+        function setupLoginSystem() {
+            // Setup login form submission
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handlePhoneLogin();
+            });
+
+            // Setup register form submission
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleRegister();
+            });
+
+            // Setup tab switching
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+
+                    // Update active tab
+                    document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // Update active form
+                    document.querySelectorAll('.login-form').forEach(form => form.classList.remove('active'));
+                    document.querySelector(`[data-form="${tabName}"]`).classList.add('active');
+                });
+            });
+
+            // Setup Google login button
+            document.getElementById('googleLoginBtn').addEventListener('click', () => {
+                handleGoogleLogin();
+            });
+
+            // Setup logout button
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        }
+
+        function handlePhoneLogin() {
+            const phone = document.getElementById('loginPhone').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+
+            if (!phone || !password) {
+                errorDiv.textContent = '請輸入電話和密碼';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '處理中...';
+
+            // POST to /api/auth/login
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: phone,
+                    password: password
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.token && data.user) {
+                    // Store auth token and user info
+                    localStorage.setItem('linboyu_auth_token', data.token);
+                    localStorage.setItem('linboyu_user', JSON.stringify(data.user));
+
+                    // Hide login modal and show main app
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.querySelector('.container').style.display = '';
+                    document.querySelector('header').style.display = '';
+
+                    updateHeaderWithUser(data.user);
+                    prefillUserInfo(data.user);
+                    showToast('登錄成功！', 'success');
+                } else {
+                    throw new Error(data.message || '登錄失敗');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = error.message || '登錄失敗，請檢查帳號密碼';
+                errorDiv.classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '登錄';
+            });
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('registerName').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const errorDiv = document.getElementById('registerError');
+            const submitBtn = document.getElementById('registerSubmitBtn');
+
+            if (!name || !phone || !email || !password) {
+                errorDiv.textContent = '請填寫所有欄位';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '註冊中...';
+
+            // POST to /api/auth/register
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    password: password
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.token && data.user) {
+                    // Store auth token and user info
+                    localStorage.setItem('linboyu_auth_token', data.token);
+                    localStorage.setItem('linboyu_user', JSON.stringify(data.user));
+
+                    // Hide login modal and show main app
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.querySelector('.container').style.display = '';
+                    document.querySelector('header').style.display = '';
+
+                    updateHeaderWithUser(data.user);
+                    prefillUserInfo(data.user);
+                    showToast('註冊成功！', 'success');
+                } else {
+                    throw new Error(data.message || '註冊失敗');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = error.message || '註冊失敗';
+                errorDiv.classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '註冊';
+            });
+        }
+
+        function handleGoogleLogin() {
+            // Initialize Google Sign-In
+            google.accounts.id.initialize({
+                client_id: 'YOUR_GOOGLE_CLIENT_ID',
+                callback: handleGoogleSignInResponse
+            });
+
+            // Show Google Sign-In prompt
+            google.accounts.id.prompt();
+        }
+
+        function handleGoogleSignInResponse(response) {
+            // Send the token to backend
+            fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    credential: response.credential
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.token && data.user) {
+                    // Store auth token and user info
+                    localStorage.setItem('linboyu_auth_token', data.token);
+                    localStorage.setItem('linboyu_user', JSON.stringify(data.user));
+
+                    // Hide login modal and show main app
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.querySelector('.container').style.display = '';
+                    document.querySelector('header').style.display = '';
+
+                    updateHeaderWithUser(data.user);
+                    prefillUserInfo(data.user);
+                    showToast('Google 登錄成功！', 'success');
+                } else {
+                    throw new Error(data.message || 'Google 登錄失敗');
+                }
+            })
+            .catch(error => {
+                showToast(error.message || 'Google 登錄失敗', 'error');
+            });
+        }
+
+        function handleLogout() {
+            // Clear user data from localStorage
+            localStorage.removeItem('linboyu_auth_token');
+            localStorage.removeItem('linboyu_user');
+
+            // Reset app state
+            appState.cart = {};
+            appState.discountCode = null;
+            appState.discountAmount = 0;
+
+            // Show login modal
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.querySelector('.container').style.display = 'none';
+            document.querySelector('header').style.display = 'none';
+
+            // Reset form inputs
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('registerError').classList.remove('show');
+
+            showToast('已登出', 'success');
         }
     </script>
 </body>

@@ -55,6 +55,7 @@ async function startServer() {
   const lineRouter = require('./routes/line');
   const adminRouter = require('./routes/admin');
   const discountRouter = require('./routes/discount');
+  const authRouter = require('./routes/auth');
 
   app.use('/api/products', productsRouter);
   app.use('/api/orders', ordersRouter);
@@ -64,6 +65,7 @@ async function startServer() {
   app.use('/api/line', lineRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api/discount', discountRouter);
+  app.use('/api/auth', authRouter);
 
   // ===== 404 處理 =====
   app.use((req, res) => {

@@ -7,34 +7,58 @@ const dayjs = require('dayjs');
 // ===== 驗證中介軟體（管理員） =====
 const requireAdmin = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  const adminToken = process.env.ADMIN_TOKEN || 'demo-admin-token';
 
-  if (!token || token !== adminToken) {
+  if (!token) {
     return res.status(401).json({ error: '未授權的訪問' });
   }
-  next();
+
+  // Check if token is stored in settings (from admin login)
+  const storedPhone = db.prepare("SELECT value FROM settings WHERE key = ?").get(`admin_token_${token}`)?.value;
+
+  if (storedPhone) {
+    // Token is valid from admin login
+    next();
+  } else if (token === (process.env.ADMIN_TOKEN || 'demo-admin-token')) {
+    // Fall back to environment variable token
+    next();
+  } else {
+    return res.status(401).json({ error: '未授權的訪問' });
+  }
 };
 
 // ===== POST /api/admin/login - 管理員登入 =====
 router.post('/login', (req, res) => {
   try {
-    const { password } = req.body;
+    const { username, phone, password } = req.body;
 
     if (!password) {
       return res.status(400).json({ error: '缺少密碼' });
     }
 
-    // 取得儲存的密碼（實務應使用 bcrypt）
-    const adminPassword = process.env.ADMIN_PASSWORD || db.prepare(
-      "SELECT value FROM settings WHERE key = 'admin_password_hash'"
-    ).get()?.value;
+    // Accept either username or phone
+    const adminUsername = username || phone;
 
-    if (!adminPassword || password !== adminPassword) {
-      return res.status(401).json({ error: '密碼錯誤' });
+    if (!adminUsername) {
+      return res.status(400).json({ error: '缺少帳戶名稱或手機號碼' });
+    }
+
+    // Default admin credentials: username=admin, password=admin2026
+    const defaultAdminUsername = 'admin';
+    const defaultAdminPassword = 'admin2026';
+
+    if (adminUsername !== defaultAdminUsername || password !== defaultAdminPassword) {
+      return res.status(401).json({ error: '帳戶名稱或密碼錯誤' });
     }
 
     // 生成簡單的 token（實務應使用 JWT）
-    const token = `admin-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Store token in settings table
+    db.prepare("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)").run(
+      `admin_token_${token}`,
+      'admin'
+    );
 
     res.json({
       success: true,

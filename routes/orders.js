@@ -64,10 +64,6 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: '缺少必填欄位' });
     }
 
-    if (delivery_type === 'delivery' && !delivery_address) {
-      return res.status(400).json({ error: '外送需要提供收貨地址' });
-    }
-
     if (!dayjs(pickup_date).isValid()) {
       return res.status(400).json({ error: '無效的取餐日期' });
     }
@@ -141,12 +137,7 @@ router.post('/', (req, res) => {
 
     // ===== 計算最終金額 =====
     const discountAmount = subtotal - Math.round(subtotal * discountRate);
-    let deliveryFee = 0;
-
-    if (delivery_type === 'delivery') {
-      const deliveryFeeStr = db.prepare("SELECT value FROM settings WHERE key = 'delivery_fee'").get();
-      deliveryFee = parseInt(deliveryFeeStr?.value) || 30;
-    }
+    const deliveryFee = 0;
 
     const totalAmount = Math.round(subtotal * discountRate) + deliveryFee;
     const orderNumber = generateOrderNumber();
