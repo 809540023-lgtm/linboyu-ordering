@@ -1172,10 +1172,10 @@
                     body: JSON.stringify({ username, password })
                 });
 
-                if (!res.ok) throw new Error('登入失敗');
-
                 const data = await res.json();
-                authToken = data.token;
+                if (!res.ok) throw new Error(data.error || '登入失敗');
+
+                authToken = data.data?.token || data.token;
                 sessionStorage.setItem('adminToken', authToken);
                 sessionStorage.setItem('adminUser', username);
                 document.getElementById('userDisplay').textContent = username;
@@ -1183,7 +1183,7 @@
                 showDashboard();
                 loadDashboardData();
             } catch (err) {
-                showToast('登入失敗，請檢查帳號密碼', 'error');
+                showToast(err.message || '登入失敗，請檢查帳號密碼', 'error');
             }
         }
 
