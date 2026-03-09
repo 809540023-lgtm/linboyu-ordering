@@ -1,0 +1,41 @@
+# ===== Render Blueprint — 自動部署設定 =====
+# Render 會讀取此檔案自動設定服務
+
+services:
+  - type: web
+    name: linboyu-ordering
+    runtime: node
+    region: singapore  # 離台灣最近的機房
+    plan: free         # 免費方案（可後續升級）
+    buildCommand: npm install && npm run seed
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: ADMIN_TOKEN
+        generateValue: true  # Render 自動產生隨機 token
+      - key: ADMIN_PASSWORD
+        value: admin2026
+      - key: APP_URL
+        sync: false  # 部署後手動設定為 Render 分配的 URL
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: NEWEBPAY_MERCHANT_ID
+        sync: false
+      - key: NEWEBPAY_HASH_KEY
+        sync: false
+      - key: NEWEBPAY_HASH_IV
+        sync: false
+      - key: LINE_CHANNEL_ID
+        sync: false
+      - key: LINE_CHANNEL_SECRET
+        sync: false
+      - key: LINE_CHANNEL_ACCESS_TOKEN
+        sync: false
+    disk:
+      name: ordering-data
+      mountPath: /app/db
+      sizeGB: 1

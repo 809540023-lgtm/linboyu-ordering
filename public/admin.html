@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理後台 - 纖體食驗室 × 林博御AI膳</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .login-box .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #5568d3;
+        }
+
+        .btn-login:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #1a1a2e;
+            color: #ecf0f1;
+            padding: 20px 0;
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #16213e;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-brand p {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar-menu a:hover {
+            background: #16213e;
+            color: #ecf0f1;
+        }
+
+        .sidebar-menu a.active {
+            background: #667eea;
+            color: white;
+            border-left-color: #fff;
+        }
+
+        .sidebar-menu a .icon {
+            margin-right: 12px;
+            font-size: 18px;
+            min-width: 24px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .top-bar-left h1 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .top-bar-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .card-change {
+            font-size: 12px;
+            color: #27ae60;
+        }
+
+        /* Chart */
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-width: 30px;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters input, .filters select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: #f9f9f9;
+            border-bottom: 2px solid #eee;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-confirmed {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-preparing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-ready {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            margin-right: 4px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-small {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 3000;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            animation: slideInRight 0.3s ease-out;
+            min-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-success {
+            border-left: 4px solid #27ae60;
+            color: #27ae60;
+        }
+
+        .toast-error {
+            border-left: 4px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .toast-info {
+            border-left: 4px solid #667eea;
+            color: #667eea;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 10px 0;
+            }
+
+            .sidebar-brand h2,
+            .sidebar-brand p,
+            .sidebar-menu a span {
+                display: none;
+            }
+
+            .sidebar-menu a {
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .sidebar-menu a .icon {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 70px;
+                padding: 10px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .modal {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1>管理後台</h1>
+            <p class="subtitle">纖體食驗室 × 林博御AI膳</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">帳號</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密碼</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-login">登入</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <h2>林博御AI膳</h2>
+                <p>管理系統</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" data-section="overview" class="nav-link active"><span class="icon">📊</span><span>儀表板</span></a></li>
+                <li><a href="#" data-section="orders" class="nav-link"><span class="icon">📦</span><span>訂單管理</span></a></li>
+                <li><a href="#" data-section="products" class="nav-link"><span class="icon">🍽️</span><span>產品管理</span></a></li>
+                <li><a href="#" data-section="inventory" class="nav-link"><span class="icon">📈</span><span>庫存管理</span></a></li>
+                <li><a href="#" data-section="customers" class="nav-link"><span class="icon">👥</span><span>客戶管理</span></a></li>
+                <li><a href="#" data-section="discounts" class="nav-link"><span class="icon">🎟️</span><span>折扣碼管理</span></a></li>
+                <li><a href="#" data-section="messaging" class="nav-link"><span class="icon">💬</span><span>LINE 訊息</span></a></li>
+                <li><a href="#" data-section="reports" class="nav-link"><span class="icon">📄</span><span>報表</span></a></li>
+                <li><a href="#" data-section="settings" class="nav-link"><span class="icon">⚙️</span><span>設定</span></a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h1 id="pageTitle">儀表板</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="user-info">
+                        <span id="userDisplay">Admin</span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">登出</button>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overview" class="content active">
+                <!-- Stats Cards -->
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>今日訂單</h3>
+                        <div class="card-value" id="todayOrders">0</div>
+                        <div class="card-change">較昨日 <span id="ordersChange">0</span>%</div>
+                    </div>
+                    <div class="card">
+                        <h3>今日營收</h3>
+                        <div class="card-value" id="todayRevenue">$0</div>
+                        <div class="card-change">較昨日 <span id="revenueChange">0</span>%</div>
+                    </div>
+                    <div class="card">
+                        <h3>平均訂單金額</h3>
+                        <div class="card-value" id="avgOrderValue">$0</div>
+                        <div class="card-change">7日平均</div>
+                    </div>
+                </div>
+
+                <!-- 7-Day Chart -->
+                <div class="chart-container">
+                    <div class="chart-title">近 7 日營收趨勢</div>
+                    <div class="bar-chart" id="revenueChart"></div>
+                </div>
+
+                <!-- Order Status -->
+                <div class="chart-container">
+                    <div class="chart-title">訂單狀態分佈</div>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3>已確認</h3>
+                            <div class="card-value" id="statusConfirmed">0</div>
+                        </div>
+                        <div class="card">
+                            <h3>準備中</h3>
+                            <div class="card-value" id="statusPreparing">0</div>
+                        </div>
+                        <div class="card">
+                            <h3>已完成</h3>
+                            <div class="card-value" id="statusCompleted">0</div>
+                        </div>
+                        <div class="card">
+                            <h3>已取消</h3>
+                            <div class="card-value" id="statusCancelled">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="table-container">
+                    <h3 style="margin-bottom: 15px;">快速操作</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" onclick="switchSection('orders')">📦 查看訂單</button>
+                        <button class="btn" onclick="switchSection('inventory')">📈 檢查庫存</button>
+                        <button class="btn" onclick="switchSection('products')">🍽️ 新增產品</button>
+                        <button class="btn" onclick="switchSection('messaging')">💬 發送訊息</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="orders" class="content">
+                <div class="table-container">
+                    <div class="filters">
+                        <input type="date" id="orderDate" placeholder="日期">
+                        <select id="orderStatus">
+                            <option value="">所有狀態</option>
+                            <option value="confirmed">已確認</option>
+                            <option value="preparing">準備中</option>
+                            <option value="ready">已就緒</option>
+                            <option value="completed">已完成</option>
+                            <option value="cancelled">已取消</option>
+                        </select>
+                        <input type="text" id="orderSearch" placeholder="搜尋訂單號或電話">
+                        <button class="btn" onclick="loadOrders()">🔍 搜尋</button>
+                    </div>
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>訂單號</th>
+                                <th>客戶電話</th>
+                                <th>金額</th>
+                                <th>狀態</th>
+                                <th>付款</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div id="products" class="content">
+                <div class="table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>產品列表</h3>
+                        <button class="btn" onclick="openProductModal()">+ 新增產品</button>
+                    </div>
+                    <input type="text" id="productSearch" placeholder="搜尋產品..." style="margin-bottom: 15px; width: 100%; max-width: 300px;">
+                    <table id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>名稱</th>
+                                <th>價格</th>
+                                <th>成本</th>
+                                <th>每日配額</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Inventory Section -->
+            <div id="inventory" class="content">
+                <div class="table-container">
+                    <div style="margin-bottom: 20px;">
+                        <label>選擇日期:</label>
+                        <input type="date" id="inventoryDate" style="margin-right: 10px;">
+                        <button class="btn" onclick="loadInventory()">查詢</button>
+                    </div>
+                    <table id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>產品名稱</th>
+                                <th>總數量</th>
+                                <th>已售</th>
+                                <th>已預訂</th>
+                                <th>可用</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customers Section -->
+            <div id="customers" class="content">
+                <div class="table-container">
+                    <input type="text" id="customerSearch" placeholder="搜尋客戶..." style="margin-bottom: 15px; width: 100%; max-width: 300px;">
+                    <table id="customersTable">
+                        <thead>
+                            <tr>
+                                <th>名稱</th>
+                                <th>電話</th>
+                                <th>訂單數</th>
+                                <th>總消費</th>
+                                <th>標籤</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Discounts Section -->
+            <div id="discounts" class="content">
+                <div class="table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>折扣碼</h3>
+                        <button class="btn" onclick="openDiscountModal()">+ 新增折扣碼</button>
+                    </div>
+                    <table id="discountsTable">
+                        <thead>
+                            <tr>
+                                <th>代碼</th>
+                                <th>折扣</th>
+                                <th>有效期</th>
+                                <th>使用次數</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="discountsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Messaging Section -->
+            <div id="messaging" class="content">
+                <div class="table-container">
+                    <h3 style="margin-bottom: 20px;">LINE 訊息</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4>廣播訊息</h4>
+                            <form id="broadcastForm" onsubmit="sendBroadcast(event)">
+                                <div class="form-group">
+                                    <label>訊息內容</label>
+                                    <textarea id="broadcastMessage" placeholder="輸入要發送給所有客戶的訊息"></textarea>
+                                </div>
+                                <button type="submit" class="btn">📤 發送廣播</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h4>推播訊息</h4>
+                            <form id="pushForm" onsubmit="sendPush(event)">
+                                <div class="form-group">
+                                    <label>客戶電話</label>
+                                    <input type="text" id="pushPhone" placeholder="輸入客戶電話" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>訊息內容</label>
+                                    <textarea id="pushMessage" placeholder="輸入要發送的訊息"></textarea>
+                                </div>
+                                <button type="submit" class="btn">📤 發送推播</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports" class="content">
+                <div class="table-container">
+                    <h3 style="margin-bottom: 20px;">報表</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label>開始日期:</label>
+                        <input type="date" id="reportStartDate" style="margin-right: 15px;">
+                        <label>結束日期:</label>
+                        <input type="date" id="reportEndDate" style="margin-right: 15px;">
+                        <button class="btn" onclick="generateReport()">生成報表</button>
+                        <button class="btn btn-secondary" onclick="exportReport()">📥 匯出</button>
+                    </div>
+                    <table id="reportsTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>訂單數</th>
+                                <th>營收</th>
+                                <th>平均訂單</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="content">
+                <div class="table-container">
+                    <h3 style="margin-bottom: 20px;">設定</h3>
+                    <form id="settingsForm" onsubmit="saveSettings(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>店家名稱</label>
+                                <input type="text" id="shopName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>電話</label>
+                                <input type="tel" id="shopPhone" required>
+                            </div>
+                        </div>
+                        <div class="form-grid full">
+                            <div class="form-group">
+                                <label>地址</label>
+                                <input type="text" id="shopAddress" required>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>營業時間開始</label>
+                                <input type="time" id="openingTime" required>
+                            </div>
+                            <div class="form-group">
+                                <label>營業時間結束</label>
+                                <input type="time" id="closingTime" required>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>每日配額</label>
+                                <input type="number" id="dailyQuota" required>
+                            </div>
+                            <div class="form-group">
+                                <label>啟用支付網關</label>
+                                <select id="paymentEnabled">
+                                    <option value="true">啟用</option>
+                                    <option value="false">停用</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">💾 保存設定</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>訂單詳情</h2>
+                <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="orderModalBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('orderModal')">關閉</button>
+                <select id="statusSelect" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">更改狀態</option>
+                    <option value="confirmed">已確認</option>
+                    <option value="preparing">準備中</option>
+                    <option value="ready">已就緒</option>
+                    <option value="completed">已完成</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+                <button class="btn" onclick="updateOrderStatus()">更新狀態</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="productModalTitle">新增產品</h2>
+                <button class="modal-close" onclick="closeModal('productModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm" onsubmit="saveProduct(event)">
+                    <input type="hidden" id="productId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>產品名稱</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Emoji</label>
+                            <input type="text" id="productEmoji" maxlength="2" placeholder="🍽️">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>售價</label>
+                            <input type="number" id="productPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>成本</label>
+                            <input type="number" id="productCost" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>每日配額</label>
+                            <input type="number" id="productQuota" required>
+                        </div>
+                        <div class="form-group">
+                            <label>狀態</label>
+                            <select id="productStatus">
+                                <option value="active">上架</option>
+                                <option value="paused">暫停</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group full">
+                        <label>描述</label>
+                        <textarea id="productDescription"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn">保存</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('productModal')">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discount Modal -->
+    <div id="discountModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>新增折扣碼</h2>
+                <button class="modal-close" onclick="closeModal('discountModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="discountForm" onsubmit="saveDiscount(event)">
+                    <input type="hidden" id="discountId">
+                    <div class="form-group">
+                        <label>折扣碼</label>
+                        <input type="text" id="discountCode" required>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>折扣類型</label>
+                            <select id="discountType">
+                                <option value="percentage">百分比</option>
+                                <option value="fixed">固定金額</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>折扣值</label>
+                            <input type="number" id="discountValue" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>開始日期</label>
+                            <input type="date" id="discountStartDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>結束日期</label>
+                            <input type="date" id="discountEndDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>使用次數限制</label>
+                        <input type="number" id="discountUsageLimit">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn">保存</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('discountModal')">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:3000/api';
+        let authToken = null;
+        let currentOrderId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const stored = sessionStorage.getItem('adminToken');
+            if (stored) {
+                authToken = stored;
+                showDashboard();
+            }
+            setupEventListeners();
+        });
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.dataset.section;
+                    switchSection(section);
+                });
+            });
+        }
+
+        // Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!res.ok) throw new Error('登入失敗');
+
+                const data = await res.json();
+                authToken = data.token;
+                sessionStorage.setItem('adminToken', authToken);
+                sessionStorage.setItem('adminUser', username);
+                document.getElementById('userDisplay').textContent = username;
+
+                showDashboard();
+                loadDashboardData();
+            } catch (err) {
+                showToast('登入失敗，請檢查帳號密碼', 'error');
+            }
+        }
+
+        // Logout
+        function logout() {
+            authToken = null;
+            sessionStorage.clear();
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        // Show Dashboard
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('userDisplay').textContent = sessionStorage.getItem('adminUser') || 'Admin';
+        }
+
+        // Switch Section
+        function switchSection(section) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+            const titles = {
+                overview: '儀表板',
+                orders: '訂單管理',
+                products: '產品管理',
+                inventory: '庫存管理',
+                customers: '客戶管理',
+                discounts: '折扣碼管理',
+                messaging: 'LINE 訊息',
+                reports: '報表',
+                settings: '設定'
+            };
+
+            document.getElementById('pageTitle').textContent = titles[section];
+
+            if (section === 'orders') loadOrders();
+            if (section === 'products') loadProducts();
+            if (section === 'inventory') loadInventory();
+            if (section === 'customers') loadCustomers();
+            if (section === 'discounts') loadDiscounts();
+            if (section === 'settings') loadSettings();
+        }
+
+        // Load Dashboard Data
+        async function loadDashboardData() {
+            try {
+                const res = await apiCall(`${API_BASE}/admin/dashboard`);
+                const data = res.data || res;
+
+                document.getElementById('todayOrders').textContent = data.todayOrders || 0;
+                document.getElementById('todayRevenue').textContent = `$${(data.todayRevenue || 0).toFixed(0)}`;
+                document.getElementById('avgOrderValue').textContent = `$${(data.avgOrderValue || 0).toFixed(0)}`;
+                document.getElementById('ordersChange').textContent = data.ordersChange || 0;
+                document.getElementById('revenueChange').textContent = data.revenueChange || 0;
+
+                document.getElementById('statusConfirmed').textContent = data.statusConfirmed || 0;
+                document.getElementById('statusPreparing').textContent = data.statusPreparing || 0;
+                document.getElementById('statusCompleted').textContent = data.statusCompleted || 0;
+                document.getElementById('statusCancelled').textContent = data.statusCancelled || 0;
+
+                renderRevenueChart(data.sevenDayRevenue || []);
+            } catch (err) {
+                console.error('Failed to load dashboard:', err);
+            }
+        }
+
+        // Render Revenue Chart
+        function renderRevenueChart(data) {
+            const chart = document.getElementById('revenueChart');
+            if (!data.length) data = [0, 0, 0, 0, 0, 0, 0];
+
+            const max = Math.max(...data, 1);
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
+
+            chart.innerHTML = data.map((val, idx) => {
+                const height = (val / max) * 180;
+                return `
+                    <div class="bar" style="height: ${height}px;">
+                        <div class="bar-label">${days[idx]}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load Orders
+        async function loadOrders() {
+            try {
+                const res = await apiCall(`${API_BASE}/orders`);
+                const orders = Array.isArray(res) ? res : res.data || [];
+
+                const tbody = document.getElementById('ordersTableBody');
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>#${order.id}</td>
+                        <td>${order.phone}</td>
+                        <td>$${order.total.toFixed(0)}</td>
+                        <td><span class="status-badge status-${order.status}">${order.statusText || order.status}</span></td>
+                        <td>${order.paymentStatus || '未付款'}</td>
+                        <td>
+                            <button class="btn btn-small" onclick="viewOrder('${order.id}')">查看</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load orders:', err);
+            }
+        }
+
+        // View Order
+        async function viewOrder(orderId) {
+            try {
+                currentOrderId = orderId;
+                const res = await apiCall(`${API_BASE}/orders/${orderId}`);
+                const order = res.data || res;
+
+                const body = document.getElementById('orderModalBody');
+                const items = Array.isArray(order.items) ? order.items : [];
+
+                body.innerHTML = `
+                    <div class="form-grid full">
+                        <div class="form-group">
+                            <label>訂單號: #${order.id}</label>
+                        </div>
+                        <div class="form-group">
+                            <label>客戶</label>
+                            <p>${order.customerName} - ${order.phone}</p>
+                        </div>
+                        <div class="form-group">
+                            <label>訂單項目</label>
+                            <table style="width: 100%; font-size: 14px;">
+                                <tr><th>產品</th><th>數量</th><th>金額</th></tr>
+                                ${items.map(item => `<tr><td>${item.name}</td><td>${item.qty}</td><td>$${item.price}</td></tr>`).join('')}
+                            </table>
+                        </div>
+                        <div class="form-group">
+                            <label>總額: $${order.total.toFixed(0)}</label>
+                        </div>
+                        <div class="form-group">
+                            <label>備註</label>
+                            <p>${order.notes || '-'}</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('statusSelect').value = order.status;
+                document.getElementById('orderModal').classList.add('active');
+            } catch (err) {
+                showToast('載入訂單失敗', 'error');
+            }
+        }
+
+        // Update Order Status
+        async function updateOrderStatus() {
+            const status = document.getElementById('statusSelect').value;
+            if (!status || !currentOrderId) return;
+
+            try {
+                await apiCall(`${API_BASE}/orders/${currentOrderId}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status })
+                });
+
+                showToast('訂單狀態已更新', 'success');
+                closeModal('orderModal');
+                loadOrders();
+            } catch (err) {
+                showToast('更新失敗', 'error');
+            }
+        }
+
+        // Load Products
+        async function loadProducts() {
+            try {
+                const res = await apiCall(`${API_BASE}/products`);
+                const products = Array.isArray(res) ? res : res.data || [];
+
+                const tbody = document.getElementById('productsTableBody');
+                tbody.innerHTML = products.map(product => `
+                    <tr>
+                        <td>${product.emoji || '🍽️'} ${product.name}</td>
+                        <td>$${product.price.toFixed(0)}</td>
+                        <td>$${product.cost.toFixed(0)}</td>
+                        <td>${product.daily_quota}</td>
+                        <td><span class="status-badge status-${product.status === 'active' ? 'confirmed' : 'cancelled'}">${product.status === 'active' ? '上架' : '暫停'}</span></td>
+                        <td>
+                            <button class="btn btn-small" onclick="editProduct('${product.id}')">編輯</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteProduct('${product.id}')">刪除</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load products:', err);
+            }
+        }
+
+        // Open Product Modal
+        function openProductModal() {
+            document.getElementById('productId').value = '';
+            document.getElementById('productForm').reset();
+            document.getElementById('productModalTitle').textContent = '新增產品';
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        // Edit Product
+        async function editProduct(productId) {
+            try {
+                const res = await apiCall(`${API_BASE}/products/${productId}`);
+                const product = res.data || res;
+
+                document.getElementById('productId').value = product.id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productEmoji').value = product.emoji;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productCost').value = product.cost;
+                document.getElementById('productQuota').value = product.daily_quota;
+                document.getElementById('productStatus').value = product.status;
+                document.getElementById('productDescription').value = product.description || '';
+                document.getElementById('productModalTitle').textContent = '編輯產品';
+                document.getElementById('productModal').classList.add('active');
+            } catch (err) {
+                showToast('載入產品失敗', 'error');
+            }
+        }
+
+        // Save Product
+        async function saveProduct(e) {
+            e.preventDefault();
+            const productId = document.getElementById('productId').value;
+            const data = {
+                name: document.getElementById('productName').value,
+                emoji: document.getElementById('productEmoji').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                cost: parseFloat(document.getElementById('productCost').value),
+                daily_quota: parseInt(document.getElementById('productQuota').value),
+                status: document.getElementById('productStatus').value,
+                description: document.getElementById('productDescription').value
+            };
+
+            try {
+                if (productId) {
+                    await apiCall(`${API_BASE}/products/${productId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    await apiCall(`${API_BASE}/products`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                }
+                showToast('產品已保存', 'success');
+                closeModal('productModal');
+                loadProducts();
+            } catch (err) {
+                showToast('保存失敗', 'error');
+            }
+        }
+
+        // Delete Product
+        async function deleteProduct(productId) {
+            if (!confirm('確定要刪除此產品?')) return;
+
+            try {
+                await apiCall(`${API_BASE}/products/${productId}`, { method: 'DELETE' });
+                showToast('產品已刪除', 'success');
+                loadProducts();
+            } catch (err) {
+                showToast('刪除失敗', 'error');
+            }
+        }
+
+        // Load Inventory
+        async function loadInventory() {
+            const date = document.getElementById('inventoryDate').value || new Date().toISOString().split('T')[0];
+            try {
+                const res = await apiCall(`${API_BASE}/inventory/${date}`);
+                const items = Array.isArray(res) ? res : res.data || [];
+
+                const tbody = document.getElementById('inventoryTableBody');
+                tbody.innerHTML = items.map(item => `
+                    <tr>
+                        <td>${item.productName}</td>
+                        <td><input type="number" value="${item.total}" style="width: 80px;"></td>
+                        <td>${item.sold}</td>
+                        <td>${item.reserved}</td>
+                        <td>${item.available}</td>
+                        <td><button class="btn btn-small" onclick="saveInventoryItem('${item.productId}', '${date}')">保存</button></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load inventory:', err);
+            }
+        }
+
+        // Load Customers
+        async function loadCustomers() {
+            try {
+                const res = await apiCall(`${API_BASE}/customers`);
+                const customers = Array.isArray(res) ? res : res.data || [];
+
+                const tbody = document.getElementById('customersTableBody');
+                tbody.innerHTML = customers.map(cust => `
+                    <tr>
+                        <td>${cust.name}</td>
+                        <td>${cust.phone}</td>
+                        <td>${cust.orderCount || 0}</td>
+                        <td>$${(cust.totalSpent || 0).toFixed(0)}</td>
+                        <td><span class="status-badge status-confirmed">${cust.tag || 'regular'}</span></td>
+                        <td><button class="btn btn-small" onclick="editCustomerTag('${cust.id}')">編輯</button></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load customers:', err);
+            }
+        }
+
+        // Load Discounts
+        async function loadDiscounts() {
+            try {
+                const res = await apiCall(`${API_BASE}/discount/codes`);
+                const codes = Array.isArray(res) ? res : res.data || [];
+
+                const tbody = document.getElementById('discountsTableBody');
+                tbody.innerHTML = codes.map(code => `
+                    <tr>
+                        <td>${code.code}</td>
+                        <td>${code.type === 'percentage' ? code.value + '%' : '$' + code.value}</td>
+                        <td>${code.endDate}</td>
+                        <td>${code.usageCount || 0}</td>
+                        <td><span class="status-badge status-${code.active ? 'confirmed' : 'cancelled'}">${code.active ? '啟用' : '停用'}</span></td>
+                        <td><button class="btn btn-small" onclick="editDiscount('${code.id}')">編輯</button></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load discounts:', err);
+            }
+        }
+
+        // Open Discount Modal
+        function openDiscountModal() {
+            document.getElementById('discountId').value = '';
+            document.getElementById('discountForm').reset();
+            document.getElementById('discountModal').classList.add('active');
+        }
+
+        // Edit Discount
+        async function editDiscount(discountId) {
+            try {
+                const res = await apiCall(`${API_BASE}/discount/codes/${discountId}`);
+                const code = res.data || res;
+
+                document.getElementById('discountId').value = code.id;
+                document.getElementById('discountCode').value = code.code;
+                document.getElementById('discountType').value = code.type;
+                document.getElementById('discountValue').value = code.value;
+                document.getElementById('discountStartDate').value = code.startDate;
+                document.getElementById('discountEndDate').value = code.endDate;
+                document.getElementById('discountUsageLimit').value = code.usageLimit || '';
+                document.getElementById('discountModal').classList.add('active');
+            } catch (err) {
+                showToast('載入折扣碼失敗', 'error');
+            }
+        }
+
+        // Save Discount
+        async function saveDiscount(e) {
+            e.preventDefault();
+            const discountId = document.getElementById('discountId').value;
+            const data = {
+                code: document.getElementById('discountCode').value,
+                type: document.getElementById('discountType').value,
+                value: parseFloat(document.getElementById('discountValue').value),
+                startDate: document.getElementById('discountStartDate').value,
+                endDate: document.getElementById('discountEndDate').value,
+                usageLimit: parseInt(document.getElementById('discountUsageLimit').value) || null
+            };
+
+            try {
+                if (discountId) {
+                    await apiCall(`${API_BASE}/discount/codes/${discountId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    await apiCall(`${API_BASE}/discount/codes`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                }
+                showToast('折扣碼已保存', 'success');
+                closeModal('discountModal');
+                loadDiscounts();
+            } catch (err) {
+                showToast('保存失敗', 'error');
+            }
+        }
+
+        // Send Broadcast
+        async function sendBroadcast(e) {
+            e.preventDefault();
+            const message = document.getElementById('broadcastMessage').value;
+            if (!message) return showToast('請輸入訊息', 'error');
+
+            try {
+                await apiCall(`${API_BASE}/line/broadcast`, {
+                    method: 'POST',
+                    body: JSON.stringify({ message })
+                });
+                showToast('廣播訊息已發送', 'success');
+                document.getElementById('broadcastForm').reset();
+            } catch (err) {
+                showToast('發送失敗', 'error');
+            }
+        }
+
+        // Send Push
+        async function sendPush(e) {
+            e.preventDefault();
+            const phone = document.getElementById('pushPhone').value;
+            const message = document.getElementById('pushMessage').value;
+            if (!phone || !message) return showToast('請填寫所有欄位', 'error');
+
+            try {
+                await apiCall(`${API_BASE}/line/push`, {
+                    method: 'POST',
+                    body: JSON.stringify({ phone, message })
+                });
+                showToast('推播訊息已發送', 'success');
+                document.getElementById('pushForm').reset();
+            } catch (err) {
+                showToast('發送失敗', 'error');
+            }
+        }
+
+        // Load Settings
+        async function loadSettings() {
+            try {
+                const res = await apiCall(`${API_BASE}/admin/settings`);
+                const settings = res.data || res;
+
+                document.getElementById('shopName').value = settings.shopName || '';
+                document.getElementById('shopPhone').value = settings.shopPhone || '';
+                document.getElementById('shopAddress').value = settings.shopAddress || '';
+                document.getElementById('openingTime').value = settings.openingTime || '';
+                document.getElementById('closingTime').value = settings.closingTime || '';
+                document.getElementById('dailyQuota').value = settings.dailyQuota || '';
+                document.getElementById('paymentEnabled').value = settings.paymentEnabled ? 'true' : 'false';
+            } catch (err) {
+                console.error('Failed to load settings:', err);
+            }
+        }
+
+        // Save Settings
+        async function saveSettings(e) {
+            e.preventDefault();
+            const data = {
+                shopName: document.getElementById('shopName').value,
+                shopPhone: document.getElementById('shopPhone').value,
+                shopAddress: document.getElementById('shopAddress').value,
+                openingTime: document.getElementById('openingTime').value,
+                closingTime: document.getElementById('closingTime').value,
+                dailyQuota: parseInt(document.getElementById('dailyQuota').value),
+                paymentEnabled: document.getElementById('paymentEnabled').value === 'true'
+            };
+
+            try {
+                await apiCall(`${API_BASE}/admin/settings`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                showToast('設定已保存', 'success');
+            } catch (err) {
+                showToast('保存失敗', 'error');
+            }
+        }
+
+        // API Helper
+        async function apiCall(url, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+                ...options.headers
+            };
+
+            const res = await fetch(url, { ...options, headers });
+            if (!res.ok) {
+                if (res.status === 401) logout();
+                throw new Error(`API error: ${res.status}`);
+            }
+            return res.json();
+        }
+
+        // Modal Functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Generate Report
+        async function generateReport() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            if (!startDate || !endDate) return showToast('請選擇日期範圍', 'error');
+
+            try {
+                const res = await apiCall(`${API_BASE}/reports?startDate=${startDate}&endDate=${endDate}`);
+                const data = Array.isArray(res) ? res : res.data || [];
+
+                const tbody = document.getElementById('reportsTableBody');
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${item.orderCount}</td>
+                        <td>$${item.revenue.toFixed(0)}</td>
+                        <td>$${item.avgOrder.toFixed(0)}</td>
+                    </tr>
+                `).join('');
+
+                showToast('報表已生成', 'success');
+            } catch (err) {
+                showToast('生成失敗', 'error');
+            }
+        }
+
+        // Export Report
+        function exportReport() {
+            const tbody = document.getElementById('reportsTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const data = rows.map(row => {
+                const cells = row.querySelectorAll('td');
+                return Array.from(cells).map(c => c.textContent);
+            });
+
+            const csv = [['日期', '訂單數', '營收', '平均訂單'], ...data]
+                .map(row => row.join(','))
+                .join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `報表-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        // Set Today's Date
+        document.getElementById('inventoryDate').valueAsDate = new Date();
+        document.getElementById('reportStartDate').valueAsDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        document.getElementById('reportEndDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>

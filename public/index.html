@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康飲食訂餐系統 - 纖體食驗室 × 林博御AI膳</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 0 0 20px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 20px 0;
+            margin: 16px 0 24px 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2d7d46 0%, #e67e22 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 24px;
+            transition: transform 0.2s;
+        }
+
+        .cart-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: #e67e22;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Brand Selector */
+        .brand-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .brand-btn {
+            padding: 20px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .brand-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-btn.green {
+            color: #2d7d46;
+        }
+
+        .brand-btn.green:hover {
+            background: rgba(45, 125, 70, 0.05);
+        }
+
+        .brand-btn.green.active {
+            background: linear-gradient(135deg, #2d7d46 0%, rgba(45, 125, 70, 0.1) 100%);
+            border-color: #2d7d46;
+            color: white;
+        }
+
+        .brand-btn.orange {
+            color: #e67e22;
+        }
+
+        .brand-btn.orange:hover {
+            background: rgba(230, 126, 34, 0.05);
+        }
+
+        .brand-btn.orange.active {
+            background: linear-gradient(135deg, #e67e22 0%, rgba(230, 126, 34, 0.1) 100%);
+            border-color: #e67e22;
+            color: white;
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .calendar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .calendar-day {
+            padding: 12px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            font-size: 13px;
+        }
+
+        .calendar-day:hover {
+            border-color: #ccc;
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.active {
+            background: linear-gradient(135deg, #2d7d46 0%, #e67e22 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .day-name {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .day-date {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .discount-badge {
+            font-size: 10px;
+            font-weight: 700;
+            color: #27ae60;
+            background: #d5f4e6;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-top: 2px;
+        }
+
+        .discount-badge.normal {
+            color: #999;
+            background: #f5f5f5;
+        }
+
+        .discount-info {
+            background: #f0f8ff;
+            border-left: 4px solid #2d7d46;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .discount-info.orange {
+            border-left-color: #e67e22;
+            background: #fff8f0;
+        }
+
+        /* Products Section */
+        .products-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .products-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .product-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .product-card:hover {
+            border-color: #ddd;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e67e22;
+            margin-bottom: 8px;
+        }
+
+        .product-qty {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .product-qty.unavailable {
+            color: #e74c3c;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .qty-btn:hover:not(:disabled) {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .qty-input {
+            width: 40px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 14px;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #2d7d46 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(45, 125, 70, 0.3);
+        }
+
+        .add-to-cart-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .add-to-cart-btn.orange {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+
+        .add-to-cart-btn.orange:hover {
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .cart-sidebar {
+                position: fixed;
+                right: -400px;
+                top: 0;
+                width: 380px;
+                height: 100vh;
+                border-radius: 0;
+                z-index: 1000;
+                transition: right 0.3s ease;
+                overflow-y: auto;
+                box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+            }
+
+            .cart-sidebar.active {
+                right: 0;
+            }
+        }
+
+        .cart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .cart-empty {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+
+        .cart-items {
+            margin-bottom: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .cart-item-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .cart-item-qty {
+            color: #999;
+            margin: 0 8px;
+        }
+
+        .cart-item-price {
+            font-weight: 600;
+            color: #e67e22;
+            margin-right: 8px;
+        }
+
+        .cart-item-remove {
+            cursor: pointer;
+            color: #e74c3c;
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        .cart-item-remove:hover {
+            transform: scale(1.2);
+        }
+
+        .cart-divider {
+            height: 1px;
+            background: #f0f0f0;
+            margin: 16px 0;
+        }
+
+        .cart-summary {
+            font-size: 14px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .summary-row.subtotal {
+            font-weight: 600;
+        }
+
+        .summary-row.discount {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .summary-row.total {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e67e22;
+            margin-top: 12px;
+        }
+
+        /* Discount Code Input */
+        .discount-code-section {
+            margin: 16px 0;
+        }
+
+        .discount-code-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .discount-code-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .discount-code-input button {
+            padding: 8px 12px;
+            background: #2d7d46;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .discount-code-input button:hover {
+            background: #256239;
+        }
+
+        .discount-message {
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .discount-message.success {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .discount-message.error {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+
+        /* Checkout Button */
+        .checkout-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2d7d46 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .checkout-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(45, 125, 70, 0.3);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Checkout Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2d7d46;
+            box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+        }
+
+        .form-input.orange:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+        }
+
+        .form-error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .delivery-address-group {
+            display: none;
+        }
+
+        .delivery-address-group.active {
+            display: block;
+        }
+
+        .order-summary-modal {
+            background: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .modal-button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .modal-btn.cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #2d7d46 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .modal-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 125, 70, 0.3);
+        }
+
+        .modal-btn.confirm.orange {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+
+        .modal-btn.confirm.orange:hover {
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        /* Payment Methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .payment-method {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .payment-method:hover {
+            border-color: #2d7d46;
+            background: rgba(45, 125, 70, 0.05);
+        }
+
+        .payment-method.selected {
+            border-color: #2d7d46;
+            background: linear-gradient(135deg, rgba(45, 125, 70, 0.1) 0%, rgba(45, 125, 70, 0.05) 100%);
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #2d7d46;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1500;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .toast.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .brand-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 24px;
+                max-width: 90vw;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">🍽️ 健康飲食訂餐</div>
+            <div class="cart-icon" id="cartIcon">
+                🛒
+                <div class="cart-count" id="cartCount">0</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Brand Selector -->
+        <div class="brand-selector" id="brandSelector">
+            <button class="brand-btn green active" data-brand="fithouse">
+                🥗 纖體食驗室<br><span style="font-size: 12px; opacity: 0.8;">外送配送 +30元</span>
+            </button>
+            <button class="brand-btn orange" data-brand="linboyuai">
+                🍱 林博御AI膳<br><span style="font-size: 12px; opacity: 0.8;">門市自取</span>
+            </button>
+        </div>
+
+        <div class="main-content">
+            <!-- Calendar and Products -->
+            <div>
+                <!-- Calendar Section -->
+                <div class="calendar-section">
+                    <div class="calendar-title">📅 選擇取餐日期</div>
+                    <div class="calendar-grid" id="calendar"></div>
+                    <div class="discount-info" id="discountInfo">
+                        3天前預訂享8折優惠 (20% off)
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="products-section">
+                    <div class="products-title">🎯 選擇商品</div>
+                    <div class="products-grid" id="productsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Cart Sidebar -->
+            <div class="cart-sidebar" id="cartSidebar">
+                <div class="cart-title">🛍️ 購物車</div>
+                <div id="cartContent">
+                    <div class="cart-empty">購物車空空的</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Cart Toggle Overlay -->
+    <div id="cartOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999;" @click="closeCart()"></div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <div class="modal-title">📝 確認訂單</div>
+
+            <form id="checkoutForm">
+                <div class="form-group">
+                    <label class="form-label">姓名 *</label>
+                    <input type="text" class="form-input" id="customerName" required>
+                    <div class="form-error" id="nameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">電話 *</label>
+                    <input type="tel" class="form-input" id="customerPhone" required>
+                    <div class="form-error" id="phoneError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-input" id="customerEmail" required>
+                    <div class="form-error" id="emailError"></div>
+                </div>
+
+                <div class="form-group" id="deliveryAddressGroup" style="display: none;">
+                    <label class="form-label">外送地址 *</label>
+                    <input type="text" class="form-input" id="deliveryAddress" placeholder="請輸入完整地址">
+                    <div class="form-error" id="addressError"></div>
+                </div>
+
+                <div class="order-summary-modal" id="orderSummary"></div>
+
+                <div class="form-group">
+                    <label class="form-label">優惠碼 (選填)</label>
+                    <div class="discount-code-input">
+                        <input type="text" id="discountCodeInput" placeholder="輸入優惠碼">
+                        <button type="button" id="applyDiscountBtn">套用</button>
+                    </div>
+                    <div class="discount-message" id="discountMessage" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">付款方式 *</label>
+                    <div class="payment-methods" id="paymentMethods">
+                        <div class="payment-method selected" data-method="newebpay">
+                            💳 Newebpay
+                        </div>
+                        <div class="payment-method" data-method="linepay">
+                            💚 LINE Pay
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-button-group">
+                <button class="modal-btn cancel" id="cancelCheckoutBtn">取消</button>
+                <button class="modal-btn confirm" id="confirmCheckoutBtn">確認並付款</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let appState = {
+            selectedBrand: 'fithouse',
+            selectedDate: null,
+            cart: {},
+            products: {},
+            inventory: {},
+            discountCode: null,
+            discountAmount: 0,
+            selectedPaymentMethod: 'newebpay'
+        };
+
+        const BRAND_CONFIG = {
+            fithouse: {
+                name: '纖體食驗室',
+                color: '#2d7d46',
+                delivery: true,
+                deliveryFee: 30,
+                buttonClass: 'green'
+            },
+            linboyuai: {
+                name: '林博御AI膳',
+                color: '#e67e22',
+                delivery: false,
+                deliveryFee: 0,
+                buttonClass: 'orange'
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupBrandSelector();
+            setupCalendar();
+            setupPaymentMethods();
+            setupEventListeners();
+            fetchProducts();
+            setTodayAsSelected();
+        });
+
+        // Brand Selector
+        function setupBrandSelector() {
+            document.querySelectorAll('.brand-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appState.selectedBrand = btn.dataset.brand;
+                    appState.cart = {};
+                    updateCart();
+                    updateProducts();
+                    updateDeliveryAddressVisibility();
+                });
+            });
+        }
+
+        // Calendar Setup
+        function setupCalendar() {
+            const calendarGrid = document.getElementById('calendar');
+            calendarGrid.innerHTML = '';
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.dataset.date = date.toISOString().split('T')[0];
+
+                const dayName = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
+                const dayNum = date.getDate();
+                const discount = getDiscount(i);
+                const discountText = discount === 0 ? '原價' : `${discount}折`;
+
+                dayDiv.innerHTML = `
+                    <div class="day-name">週${dayName}</div>
+                    <div class="day-date">${dayNum}</div>
+                    <div class="discount-badge ${discount === 1 ? 'normal' : ''}">${discountText}</div>
+                `;
+
+                dayDiv.addEventListener('click', () => selectDate(dayDiv.dataset.date, i));
+                calendarGrid.appendChild(dayDiv);
+            }
+        }
+
+        function getDiscount(daysAhead) {
+            if (daysAhead >= 3) return 0.8;
+            if (daysAhead === 2) return 0.9;
+            if (daysAhead === 1) return 0.9;
+            return 1;
+        }
+
+        function selectDate(dateStr, daysAhead) {
+            document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('active'));
+            document.querySelector(`[data-date="${dateStr}"]`).classList.add('active');
+
+            appState.selectedDate = dateStr;
+
+            const discount = getDiscount(daysAhead);
+            const discountInfo = document.getElementById('discountInfo');
+            const config = BRAND_CONFIG[appState.selectedBrand];
+
+            if (discount === 0.8) {
+                discountInfo.textContent = '✨ 3天前預訂享8折優惠 (20% off)';
+                discountInfo.className = 'discount-info';
+                if (config.buttonClass === 'orange') {
+                    discountInfo.classList.add('orange');
+                }
+            } else if (discount === 0.9) {
+                discountInfo.textContent = '🎉 1天前預訂享9折優惠 (10% off)';
+                discountInfo.className = 'discount-info';
+                if (config.buttonClass === 'orange') {
+                    discountInfo.classList.add('orange');
+                }
+            } else {
+                discountInfo.textContent = '⚠️ 同日預訂，原價無折扣';
+                discountInfo.className = 'discount-info';
+                if (config.buttonClass === 'orange') {
+                    discountInfo.classList.add('orange');
+                }
+            }
+
+            fetchInventory(dateStr);
+            updateProducts();
+        }
+
+        function setTodayAsSelected() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            selectDate(dateStr, 1);
+        }
+
+        // Products
+        function fetchProducts() {
+            // Simulate API response with mock data
+            appState.products = {
+                fithouse: [
+                    { id: 'a1', name: 'A雞肉便當', emoji: '🍗', price: 80, category: 'main' },
+                    { id: 'a2', name: 'B健身餐', emoji: '💪', price: 95, category: 'main' },
+                    { id: 'a3', name: 'C沙拉套餐', emoji: '🥗', price: 85, category: 'main' },
+                    { id: 'a4', name: 'D海鮮便當', emoji: '🦐', price: 120, category: 'main' },
+                    { id: 'a5', name: 'E牛肉套餐', emoji: '🥩', price: 150, category: 'main' }
+                ],
+                linboyuai: [
+                    { id: 'b1', name: 'A和牛丼飯', emoji: '🍖', price: 120, category: 'main' },
+                    { id: 'b2', name: 'B豚骨拉麵', emoji: '🍜', price: 95, category: 'main' },
+                    { id: 'b3', name: 'C握壽司盤', emoji: '🍣', price: 150, category: 'main' },
+                    { id: 'b4', name: 'D天婦羅定食', emoji: '🍤', price: 125, category: 'main' },
+                    { id: 'b5', name: 'E親子丼', emoji: '🍚', price: 100, category: 'main' }
+                ]
+            };
+
+            updateProducts();
+        }
+
+        function fetchInventory(dateStr) {
+            // Simulate API response with mock data
+            appState.inventory = {
+                fithouse: { a1: 15, a2: 10, a3: 20, a4: 8, a5: 5 },
+                linboyuai: { b1: 12, b2: 18, b3: 6, b4: 9, b5: 14 }
+            };
+
+            updateProducts();
+        }
+
+        function updateProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            const products = appState.products[appState.selectedBrand] || [];
+            const config = BRAND_CONFIG[appState.selectedBrand];
+            const inventory = appState.inventory[appState.selectedBrand] || {};
+
+            products.forEach(product => {
+                const available = inventory[product.id] || 0;
+                const cartQty = appState.cart[product.id] || 0;
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                card.innerHTML = `
+                    <div class="product-emoji">${product.emoji}</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">NT$${product.price}</div>
+                    <div class="product-qty ${available === 0 ? 'unavailable' : ''}">
+                        ${available > 0 ? `剩餘 ${available} 份` : '已售完'}
+                    </div>
+                    <div class="qty-control">
+                        <button class="qty-btn" data-id="${product.id}" onclick="decreaseQty('${product.id}')">−</button>
+                        <input type="number" class="qty-input" value="${cartQty}" min="0" data-id="${product.id}" onchange="updateQtyFromInput('${product.id}')">
+                        <button class="qty-btn" data-id="${product.id}" onclick="increaseQty('${product.id}', ${available})">+</button>
+                    </div>
+                    <button class="add-to-cart-btn ${config.buttonClass}"
+                            data-id="${product.id}"
+                            data-price="${product.price}"
+                            onclick="addToCart('${product.id}', '${product.name}', ${product.price}, ${available})"
+                            ${available === 0 ? 'disabled' : ''}>
+                        加入購物車
+                    </button>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Cart Functions
+        function increaseQty(productId, maxAvailable) {
+            const input = document.querySelector(`input[data-id="${productId}"]`);
+            const currentQty = parseInt(input.value) || 0;
+            if (currentQty < maxAvailable) {
+                input.value = currentQty + 1;
+            }
+        }
+
+        function decreaseQty(productId) {
+            const input = document.querySelector(`input[data-id="${productId}"]`);
+            const currentQty = parseInt(input.value) || 0;
+            if (currentQty > 0) {
+                input.value = currentQty - 1;
+            }
+        }
+
+        function updateQtyFromInput(productId) {
+            const input = document.querySelector(`input[data-id="${productId}"]`);
+            const qty = parseInt(input.value) || 0;
+
+            if (qty > 0) {
+                appState.cart[productId] = qty;
+            } else {
+                delete appState.cart[productId];
+            }
+
+            updateCart();
+        }
+
+        function addToCart(productId, productName, price, available) {
+            const input = document.querySelector(`input[data-id="${productId}"]`);
+            const qty = parseInt(input.value) || 1;
+
+            if (qty > 0 && qty <= available) {
+                appState.cart[productId] = qty;
+                updateCart();
+                showToast(`已加入 ${productName} × ${qty}`, 'success');
+            }
+        }
+
+        function updateCart() {
+            const cartContent = document.getElementById('cartContent');
+            const cartCount = document.getElementById('cartCount');
+            const checkoutBtn = document.querySelector('.checkout-btn');
+
+            const itemCount = Object.values(appState.cart).reduce((a, b) => a + b, 0);
+            cartCount.textContent = itemCount;
+
+            if (itemCount === 0) {
+                cartContent.innerHTML = '<div class="cart-empty">購物車空空的</div>';
+                if (checkoutBtn) checkoutBtn.disabled = true;
+                return;
+            }
+
+            const config = BRAND_CONFIG[appState.selectedBrand];
+            const products = appState.products[appState.selectedBrand];
+
+            let subtotal = 0;
+            let html = '<div class="cart-items">';
+
+            Object.entries(appState.cart).forEach(([productId, qty]) => {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    const lineTotal = product.price * qty;
+                    subtotal += lineTotal;
+
+                    html += `
+                        <div class="cart-item">
+                            <div class="cart-item-name">${product.name}</div>
+                            <div class="cart-item-qty">× ${qty}</div>
+                            <div class="cart-item-price">NT$${lineTotal}</div>
+                            <div class="cart-item-remove" onclick="removeFromCart('${productId}')">✕</div>
+                        </div>
+                    `;
+                }
+            });
+
+            html += '</div><div class="cart-divider"></div><div class="cart-summary">';
+
+            const discount = getDiscount(getDaysAhead(appState.selectedDate));
+            let discountAmount = Math.round(subtotal * (1 - discount));
+
+            if (appState.discountCode) {
+                discountAmount += appState.discountAmount;
+            }
+
+            const deliveryFee = config.delivery ? config.deliveryFee : 0;
+            const total = subtotal - discountAmount + deliveryFee;
+
+            html += `
+                <div class="summary-row subtotal">
+                    <span>小計</span>
+                    <span>NT$${subtotal}</span>
+                </div>
+            `;
+
+            if (discountAmount > 0) {
+                html += `
+                    <div class="summary-row discount">
+                        <span>優惠</span>
+                        <span>-NT$${discountAmount}</span>
+                    </div>
+                `;
+            }
+
+            if (deliveryFee > 0) {
+                html += `
+                    <div class="summary-row">
+                        <span>外送費</span>
+                        <span>+NT$${deliveryFee}</span>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="summary-row total">
+                    <span>合計</span>
+                    <span>NT$${total}</span>
+                </div>
+                <div class="discount-code-section">
+                    <div class="discount-code-input">
+                        <input type="text" id="cartDiscountCode" placeholder="輸入優惠碼" value="${appState.discountCode || ''}">
+                        <button type="button" id="cartApplyDiscountBtn">套用</button>
+                    </div>
+                    <div class="discount-message" id="cartDiscountMessage" style="display: none;"></div>
+                </div>
+            `;
+
+            if (!checkoutBtn) {
+                html += `<button class="checkout-btn">前往結帳</button>`;
+            }
+
+            html += '</div>';
+            cartContent.innerHTML = html;
+
+            document.getElementById('cartApplyDiscountBtn').addEventListener('click', () => applyDiscountCode());
+
+            if (checkoutBtn) {
+                checkoutBtn.disabled = false;
+            } else {
+                document.querySelector('.checkout-btn').addEventListener('click', openCheckout);
+            }
+        }
+
+        function removeFromCart(productId) {
+            delete appState.cart[productId];
+            updateCart();
+        }
+
+        function getDaysAhead(dateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const selectedDate = new Date(dateStr);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            const daysAhead = Math.floor((selectedDate - today) / (1000 * 60 * 60 * 24));
+            return daysAhead;
+        }
+
+        // Checkout
+        function openCheckout() {
+            if (Object.keys(appState.cart).length === 0) {
+                showToast('請先加入商品', 'error');
+                return;
+            }
+
+            if (!appState.selectedDate) {
+                showToast('請先選擇日期', 'error');
+                return;
+            }
+
+            const config = BRAND_CONFIG[appState.selectedBrand];
+            updateOrderSummary();
+            updateDeliveryAddressVisibility();
+
+            document.getElementById('checkoutModal').classList.add('active');
+        }
+
+        function updateOrderSummary() {
+            const config = BRAND_CONFIG[appState.selectedBrand];
+            const products = appState.products[appState.selectedBrand];
+
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            Object.entries(appState.cart).forEach(([productId, qty]) => {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    const lineTotal = product.price * qty;
+                    subtotal += lineTotal;
+                    itemsHtml += `<div>${product.name} × ${qty} = NT$${lineTotal}</div>`;
+                }
+            });
+
+            const discount = getDiscount(getDaysAhead(appState.selectedDate));
+            const discountAmount = Math.round(subtotal * (1 - discount));
+            const deliveryFee = config.delivery ? config.deliveryFee : 0;
+            const total = subtotal - discountAmount + deliveryFee;
+
+            const dateObj = new Date(appState.selectedDate);
+            const dateStr = dateObj.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' });
+
+            document.getElementById('orderSummary').innerHTML = `
+                <div><strong>品牌:</strong> ${config.name}</div>
+                <div><strong>取餐日期:</strong> ${dateStr}</div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;">
+                    ${itemsHtml}
+                </div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;">
+                    <div><strong>小計:</strong> NT$${subtotal}</div>
+                    ${discountAmount > 0 ? `<div><strong style="color: #27ae60;">優惠:</strong> -NT$${discountAmount}</div>` : ''}
+                    ${deliveryFee > 0 ? `<div><strong>外送費:</strong> +NT$${deliveryFee}</div>` : ''}
+                    <div style="font-size: 16px; font-weight: 700; color: #e67e22; margin-top: 8px;">
+                        <strong>合計: NT$${total}</strong>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateDeliveryAddressVisibility() {
+            const config = BRAND_CONFIG[appState.selectedBrand];
+            const group = document.getElementById('deliveryAddressGroup');
+            const input = document.getElementById('deliveryAddress');
+            const storeInfo = document.getElementById('deliveryAddressGroup');
+
+            if (config.delivery) {
+                group.style.display = 'block';
+                input.required = true;
+            } else {
+                group.style.display = 'none';
+                input.required = false;
+            }
+        }
+
+        function setupPaymentMethods() {
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', () => {
+                    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                    method.classList.add('selected');
+                    appState.selectedPaymentMethod = method.dataset.method;
+                });
+            });
+        }
+
+        function applyDiscountCode() {
+            const codeInput = document.getElementById('cartDiscountCode') || document.getElementById('discountCodeInput');
+            const code = codeInput.value.trim().toUpperCase();
+            const messageDiv = document.getElementById('cartDiscountMessage') || document.getElementById('discountMessage');
+
+            if (!code) {
+                messageDiv.style.display = 'none';
+                return;
+            }
+
+            // Simulate API validation
+            const validCodes = {
+                'SAVE10': { amount: 100, desc: '優惠 NT$100' },
+                'SAVE20': { amount: 200, desc: '優惠 NT$200' },
+                'WELCOME': { amount: 50, desc: '優惠 NT$50' }
+            };
+
+            if (validCodes[code]) {
+                appState.discountCode = code;
+                appState.discountAmount = validCodes[code].amount;
+                messageDiv.textContent = `✓ 優惠碼已套用: ${validCodes[code].desc}`;
+                messageDiv.className = 'discount-message success';
+                messageDiv.style.display = 'block';
+                updateCart();
+            } else {
+                messageDiv.textContent = '✗ 優惠碼無效或已過期';
+                messageDiv.className = 'discount-message error';
+                messageDiv.style.display = 'block';
+                appState.discountCode = null;
+                appState.discountAmount = 0;
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            document.getElementById('cartIcon').addEventListener('click', () => {
+                const sidebar = document.getElementById('cartSidebar');
+                const overlay = document.getElementById('cartOverlay');
+                sidebar.classList.toggle('active');
+                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+            });
+
+            document.getElementById('cartOverlay').addEventListener('click', () => {
+                const sidebar = document.getElementById('cartSidebar');
+                const overlay = document.getElementById('cartOverlay');
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+            });
+
+            document.getElementById('cancelCheckoutBtn').addEventListener('click', () => {
+                document.getElementById('checkoutModal').classList.remove('active');
+            });
+
+            document.getElementById('confirmCheckoutBtn').addEventListener('click', submitOrder);
+            document.getElementById('applyDiscountBtn').addEventListener('click', applyDiscountCode);
+        }
+
+        function submitOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const address = document.getElementById('deliveryAddress').value.trim();
+
+            // Validation
+            if (!name) {
+                document.getElementById('nameError').textContent = '請輸入姓名';
+                return;
+            }
+            if (!phone) {
+                document.getElementById('phoneError').textContent = '請輸入電話';
+                return;
+            }
+            if (!email) {
+                document.getElementById('emailError').textContent = '請輸入Email';
+                return;
+            }
+
+            const config = BRAND_CONFIG[appState.selectedBrand];
+            if (config.delivery && !address) {
+                document.getElementById('addressError').textContent = '請輸入外送地址';
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmCheckoutBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '處理中...';
+
+            // Prepare order data
+            const products = appState.products[appState.selectedBrand];
+            const items = Object.entries(appState.cart).map(([productId, qty]) => {
+                const product = products.find(p => p.id === productId);
+                return {
+                    productId,
+                    quantity: qty,
+                    price: product.price
+                };
+            });
+
+            const discount = getDiscount(getDaysAhead(appState.selectedDate));
+            let subtotal = 0;
+            items.forEach(item => {
+                subtotal += item.price * item.quantity;
+            });
+
+            const discountAmount = Math.round(subtotal * (1 - discount)) + appState.discountAmount;
+            const deliveryFee = config.delivery ? config.deliveryFee : 0;
+            const total = subtotal - discountAmount + deliveryFee;
+
+            const orderData = {
+                brand: appState.selectedBrand,
+                pickupDate: appState.selectedDate,
+                items,
+                customer: {
+                    name,
+                    phone,
+                    email,
+                    deliveryAddress: address || null
+                },
+                discountCode: appState.discountCode || null,
+                subtotal,
+                discount: discountAmount,
+                deliveryFee,
+                total,
+                paymentMethod: appState.selectedPaymentMethod
+            };
+
+            // Create order
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.orderId) {
+                    // Initiate payment
+                    const paymentEndpoint = appState.selectedPaymentMethod === 'newebpay'
+                        ? '/api/payments/newebpay/create'
+                        : '/api/payments/linepay/create';
+
+                    return fetch(paymentEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderId: data.orderId,
+                            amount: total,
+                            customerEmail: email
+                        })
+                    });
+                } else {
+                    throw new Error('訂單建立失敗');
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.paymentUrl) {
+                    window.location.href = data.paymentUrl;
+                } else {
+                    throw new Error('付款初始化失敗');
+                }
+            })
+            .catch(error => {
+                showToast(error.message || '訂單處理失敗，請重試', 'error');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '確認並付款';
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
