@@ -1156,7 +1156,24 @@
 
             <!-- Login Form -->
             <form class="login-form active" id="loginForm" data-form="login-form">
-                <button type="button" class="google-login-btn" id="googleLoginBtn">
+                <div id="googleSignInContainer" style="display:flex;justify-content:center;min-height:44px;">
+                    <div id="g_id_onload"
+                         data-client_id="232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com"
+                         data-callback="handleGoogleSignInResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-size="large"
+                         data-theme="outline"
+                         data-text="signin_with"
+                         data-shape="rectangular"
+                         data-logo_alignment="left"
+                         data-width="320">
+                    </div>
+                </div>
+                <!-- Fallback button if Google button doesn't render -->
+                <button type="button" class="google-login-btn" id="googleLoginBtn" style="display:none;">
                     <span>🔵</span> 使用 Google 登錄
                 </button>
 
@@ -1851,10 +1868,19 @@
                 });
             });
 
-            // Setup Google login button
+            // Setup Google login fallback button
             document.getElementById('googleLoginBtn').addEventListener('click', () => {
                 handleGoogleLogin();
             });
+
+            // Check if Google button rendered, show fallback if not
+            setTimeout(() => {
+                const gContainer = document.getElementById('googleSignInContainer');
+                const gIframe = gContainer && gContainer.querySelector('iframe');
+                if (!gIframe) {
+                    document.getElementById('googleLoginBtn').style.display = '';
+                }
+            }, 2000);
 
             // Setup logout button
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -1967,52 +1993,16 @@
         }
 
         function handleGoogleLogin() {
-            // Use popup-based OAuth flow (more reliable than One Tap)
-            const clientId = '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com';
-            const redirectUri = encodeURIComponent(window.location.origin);
-            const scope = encodeURIComponent('openid email profile');
-            const nonce = Math.random().toString(36).substring(2);
-
-            // Initialize and use renderButton approach
+            // Fallback: use prompt method
             google.accounts.id.initialize({
-                client_id: clientId,
-                callback: handleGoogleSignInResponse,
-                auto_select: false
+                client_id: '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com',
+                callback: handleGoogleSignInResponse
             });
-
-            // Create a temporary hidden container for Google's rendered button
-            let tmpDiv = document.getElementById('g_btn_tmp');
-            if (!tmpDiv) {
-                tmpDiv = document.createElement('div');
-                tmpDiv.id = 'g_btn_tmp';
-                tmpDiv.style.position = 'fixed';
-                tmpDiv.style.top = '-9999px';
-                tmpDiv.style.left = '-9999px';
-                document.body.appendChild(tmpDiv);
-            }
-            tmpDiv.innerHTML = '';
-
-            google.accounts.id.renderButton(tmpDiv, {
-                type: 'standard',
-                theme: 'outline',
-                size: 'large',
-                click_listener: () => console.log('Google Sign-In clicked')
-            });
-
-            // Wait a moment for the button to render, then trigger click
-            setTimeout(() => {
-                const gBtn = tmpDiv.querySelector('div[role="button"]') || tmpDiv.querySelector('iframe');
-                if (gBtn) {
-                    gBtn.click();
-                } else {
-                    // Fallback: try prompt
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            showToast('Google 登入視窗無法顯示，請確認瀏覽器未封鎖彈出視窗', 'error');
-                        }
-                    });
+            google.accounts.id.prompt((notification) => {
+                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                    showToast('Google 登入視窗無法顯示，請確認瀏覽器已登入 Google 帳號', 'error');
                 }
-            }, 300);
+            });
         }
 
         function handleGoogleSignInResponse(response) {
