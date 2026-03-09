@@ -10,10 +10,10 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 # 複製 package 檔案
-COPY package.json package-lock.json* ./
+COPY package.json ./
 
-# 安裝所有依賴（含 dev）
-RUN npm ci --production
+# 安裝所有依賴
+RUN npm install --production
 
 # --- 階段 2：正式映像 ---
 FROM node:20-alpine
