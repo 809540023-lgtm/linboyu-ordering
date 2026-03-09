@@ -40,16 +40,8 @@ const sendLineMessage = async (lineUserId, message) => {
   }
 };
 
-// ===== 驗證中介軟體（管理員） =====
-const requireAdmin = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  const adminToken = process.env.ADMIN_TOKEN || 'demo-admin-token';
-
-  if (!token || token !== adminToken) {
-    return res.status(401).json({ error: '未授權的訪問' });
-  }
-  next();
-};
+// ===== 驗證中介軟體（管理員）=====
+const { requireAdmin } = require("../middleware/auth");
 
 // ===== POST /api/line/webhook - LINE Webhook 處理 =====
 router.post('/webhook', (req, res) => {

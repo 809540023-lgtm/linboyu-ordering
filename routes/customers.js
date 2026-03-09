@@ -3,16 +3,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/init');
 
-// ===== 驗證中介軟體（管理員） =====
-const requireAdmin = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  const adminToken = process.env.ADMIN_TOKEN || 'demo-admin-token';
-
-  if (!token || token !== adminToken) {
-    return res.status(401).json({ error: '未授權的訪問' });
-  }
-  next();
-};
+// ===== 驗證中介軟體（管理員）=====
+const { requireAdmin } = require("../middleware/auth");
 
 // ===== GET /api/customers - 列出所有客戶（管理員） =====
 router.get('/', requireAdmin, (req, res) => {
