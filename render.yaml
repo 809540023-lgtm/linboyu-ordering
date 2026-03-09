@@ -35,7 +35,9 @@ services:
         sync: false
       - key: LINE_CHANNEL_ACCESS_TOKEN
         sync: false
-    disk:
-      name: ordering-data
-      mountPath: /app/db
-      sizeGB: 1
+    # 注意：Free plan 不支援 disk，資料庫存於容器內
+    # 升級到付費方案後可加回 disk 持久化：
+    # disk:
+    #   name: ordering-data
+    #   mountPath: /app/db
+    #   sizeGB: 1
