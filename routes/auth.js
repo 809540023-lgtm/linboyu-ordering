@@ -100,10 +100,43 @@ router.post('/login', (req, res) => {
   }
 });
 
+// Decode Google ID Token JWT (without external library)
+function decodeGoogleIdToken(credential) {
+  try {
+    // JWT format: header.payload.signature
+    const parts = credential.split('.');
+    if (parts.length !== 3) throw new Error('Invalid JWT format');
+
+    // Decode the payload (base64url -> base64 -> JSON)
+    const payload = parts[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const decoded = Buffer.from(payload, 'base64').toString('utf-8');
+    return JSON.parse(decoded);
+  } catch (err) {
+    console.error('JWT decode error:', err);
+    return null;
+  }
+}
+
 // POST /api/auth/google
 router.post('/google', (req, res) => {
   try {
-    const { name, email, google_id } = req.body;
+    let { name, email, google_id, credential } = req.body;
+
+    // If credential (JWT) is provided, decode it to extract user info
+    if (credential && !email) {
+      const decoded = decodeGoogleIdToken(credential);
+      if (decoded) {
+        email = decoded.email;
+        name = decoded.name || decoded.given_name || email.split('@')[0];
+        google_id = decoded.sub; // Google's unique user ID
+        console.log('Google login decoded:', { email, name, google_id: google_id?.substring(0, 8) + '...' });
+      } else {
+        return res.status(400).json({ error: 'Google token 解碼失敗' });
+      }
+    }
+
     if (!email) {
       return res.status(400).json({ error: '缺少 Google 帳號資訊' });
     }

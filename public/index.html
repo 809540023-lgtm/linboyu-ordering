@@ -1912,21 +1912,22 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.token && data.user) {
+                const result = data.data || data;
+                if (result.token && result.user) {
                     // Store auth token and user info
-                    localStorage.setItem('linboyu_auth_token', data.token);
-                    localStorage.setItem('linboyu_user', JSON.stringify(data.user));
+                    localStorage.setItem('linboyu_auth_token', result.token);
+                    localStorage.setItem('linboyu_user', JSON.stringify(result.user));
 
                     // Hide login modal and show main app
                     document.getElementById('loginModal').classList.add('hidden');
                     document.querySelector('.container').style.display = '';
                     document.querySelector('header').style.display = '';
 
-                    updateHeaderWithUser(data.user);
-                    prefillUserInfo(data.user);
+                    updateHeaderWithUser(result.user);
+                    prefillUserInfo(result.user);
                     showToast('登錄成功！', 'success');
                 } else {
-                    throw new Error(data.message || '登錄失敗');
+                    throw new Error(data.error || data.message || '登錄失敗');
                 }
             })
             .catch(error => {
@@ -1967,21 +1968,22 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.token && data.user) {
+                const result = data.data || data;
+                if (result.token && result.user) {
                     // Store auth token and user info
-                    localStorage.setItem('linboyu_auth_token', data.token);
-                    localStorage.setItem('linboyu_user', JSON.stringify(data.user));
+                    localStorage.setItem('linboyu_auth_token', result.token);
+                    localStorage.setItem('linboyu_user', JSON.stringify(result.user));
 
                     // Hide login modal and show main app
                     document.getElementById('loginModal').classList.add('hidden');
                     document.querySelector('.container').style.display = '';
                     document.querySelector('header').style.display = '';
 
-                    updateHeaderWithUser(data.user);
-                    prefillUserInfo(data.user);
+                    updateHeaderWithUser(result.user);
+                    prefillUserInfo(result.user);
                     showToast('註冊成功！', 'success');
                 } else {
-                    throw new Error(data.message || '註冊失敗');
+                    throw new Error(data.error || data.message || '註冊失敗');
                 }
             })
             .catch(error => {
@@ -2016,21 +2018,23 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.token && data.user) {
+                // Backend returns { success, data: { token, user } }
+                const result = data.data || data;
+                if (result.token && result.user) {
                     // Store auth token and user info
-                    localStorage.setItem('linboyu_auth_token', data.token);
-                    localStorage.setItem('linboyu_user', JSON.stringify(data.user));
+                    localStorage.setItem('linboyu_auth_token', result.token);
+                    localStorage.setItem('linboyu_user', JSON.stringify(result.user));
 
                     // Hide login modal and show main app
                     document.getElementById('loginModal').classList.add('hidden');
                     document.querySelector('.container').style.display = '';
                     document.querySelector('header').style.display = '';
 
-                    updateHeaderWithUser(data.user);
-                    prefillUserInfo(data.user);
+                    updateHeaderWithUser(result.user);
+                    prefillUserInfo(result.user);
                     showToast('Google 登錄成功！', 'success');
                 } else {
-                    throw new Error(data.message || 'Google 登錄失敗');
+                    throw new Error(data.error || data.message || 'Google 登錄失敗');
                 }
             })
             .catch(error => {
