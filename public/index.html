@@ -1969,64 +1969,74 @@
             });
         }
 
+        var googleTokenClient = null;
+
         function initGoogleSignIn() {
             const container = document.getElementById('googleBtnContainer');
             if (!container) return;
 
+            // Create custom Google button (avoids GSI iframe 0x0 issue)
+            container.innerHTML = '<button type="button" id="customGoogleBtn" style="width:100%;padding:12px 16px;border:1px solid #dadce0;border-radius:8px;background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.2s;"><img src="https://developers.google.com/identity/images/g-logo.png" width="20" height="20" alt="G"> <span>使用 Google 帳戶登入</span></button>';
+
             try {
-                google.accounts.id.initialize({
+                // Use OAuth2 token client - opens a real popup window, not an iframe
+                googleTokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com',
-                    callback: handleGoogleSignInResponse,
-                    auto_select: false
+                    scope: 'email profile',
+                    callback: handleGoogleTokenResponse
                 });
 
-                google.accounts.id.renderButton(container, {
-                    type: 'standard',
-                    theme: 'outline',
-                    size: 'large',
-                    text: 'signin_with',
-                    shape: 'rectangular',
-                    logo_alignment: 'left',
-                    width: 320
+                document.getElementById('customGoogleBtn').addEventListener('click', function() {
+                    if (googleTokenClient) {
+                        googleTokenClient.requestAccessToken();
+                    } else {
+                        showToast('Google 登入服務尚未準備好，請稍後再試', 'error');
+                    }
                 });
+                console.log('Google OAuth2 token client initialized successfully');
             } catch (e) {
-                console.error('Google Sign-In init error:', e);
-                // Fallback: show a custom button
-                container.innerHTML = '<button type="button" class="google-login-btn" onclick="handleGoogleLoginFallback()" style="width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://developers.google.com/identity/images/g-logo.png" width="20" height="20"> 使用 Google 帳戶登入</button>';
+                console.error('Google OAuth2 init error:', e);
+                document.getElementById('customGoogleBtn').addEventListener('click', function() {
+                    showToast('Google 登入服務載入失敗，請重新整理頁面', 'error');
+                });
             }
         }
 
-        function handleGoogleLoginFallback() {
-            if (typeof google === 'undefined' || !google.accounts) {
-                showToast('Google 登入服務載入中，請稍後再試', 'error');
+        async function handleGoogleTokenResponse(tokenResponse) {
+            if (tokenResponse.error) {
+                showToast('Google 登入失敗: ' + tokenResponse.error, 'error');
                 return;
             }
-            google.accounts.id.prompt((notification) => {
-                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                    showToast('Google 登入視窗無法顯示，請確認瀏覽器已登入 Google 帳號', 'error');
-                }
-            });
-        }
 
-        function handleGoogleSignInResponse(response) {
-            // Send the token to backend
-            fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    credential: response.credential
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                // Backend returns { success, data: { token, user } }
+            try {
+                // Use access token to get user info from Google
+                const userInfoResp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { 'Authorization': 'Bearer ' + tokenResponse.access_token }
+                });
+                const userInfo = await userInfoResp.json();
+
+                if (!userInfo.email) {
+                    showToast('無法取得 Google 帳號資訊', 'error');
+                    return;
+                }
+
+                // Send user info to our backend
+                const resp = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: userInfo.name || userInfo.given_name || userInfo.email.split('@')[0],
+                        email: userInfo.email,
+                        google_id: userInfo.sub
+                    })
+                });
+                const data = await resp.json();
                 const result = data.data || data;
+
                 if (result.token && result.user) {
-                    // Store auth token and user info
                     localStorage.setItem('linboyu_auth_token', result.token);
                     localStorage.setItem('linboyu_user', JSON.stringify(result.user));
 
-                    // Hide login modal and show main app
                     document.getElementById('loginModal').classList.add('hidden');
                     document.querySelector('.container').style.display = '';
                     document.querySelector('header').style.display = '';
@@ -2037,10 +2047,10 @@
                 } else {
                     throw new Error(data.error || data.message || 'Google 登錄失敗');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
+                console.error('Google login error:', error);
                 showToast(error.message || 'Google 登錄失敗', 'error');
-            });
+            }
         }
 
         function handleLogout() {
