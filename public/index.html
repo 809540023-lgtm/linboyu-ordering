@@ -1156,26 +1156,8 @@
 
             <!-- Login Form -->
             <form class="login-form active" id="loginForm" data-form="login-form">
-                <div id="googleSignInContainer" style="display:flex;justify-content:center;min-height:44px;">
-                    <div id="g_id_onload"
-                         data-client_id="232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com"
-                         data-callback="handleGoogleSignInResponse"
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-size="large"
-                         data-theme="outline"
-                         data-text="signin_with"
-                         data-shape="rectangular"
-                         data-logo_alignment="left"
-                         data-width="320">
-                    </div>
-                </div>
-                <!-- Fallback button if Google button doesn't render -->
-                <button type="button" class="google-login-btn" id="googleLoginBtn" style="display:none;">
-                    <span>🔵</span> 使用 Google 登錄
-                </button>
+                <!-- Google Sign-In rendered by JS -->
+                <div id="googleBtnContainer" style="display:flex;justify-content:center;min-height:44px;"></div>
 
                 <div class="login-divider">
                     <span>或</span>
@@ -1868,19 +1850,8 @@
                 });
             });
 
-            // Setup Google login fallback button
-            document.getElementById('googleLoginBtn').addEventListener('click', () => {
-                handleGoogleLogin();
-            });
-
-            // Check if Google button rendered, show fallback if not
-            setTimeout(() => {
-                const gContainer = document.getElementById('googleSignInContainer');
-                const gIframe = gContainer && gContainer.querySelector('iframe');
-                if (!gIframe) {
-                    document.getElementById('googleLoginBtn').style.display = '';
-                }
-            }, 2000);
+            // Initialize Google Sign-In and render button via JS
+            initGoogleSignIn();
 
             // Setup logout button
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -1994,12 +1965,34 @@
             });
         }
 
-        function handleGoogleLogin() {
-            // Fallback: use prompt method
-            google.accounts.id.initialize({
-                client_id: '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com',
-                callback: handleGoogleSignInResponse
-            });
+        function initGoogleSignIn() {
+            const container = document.getElementById('googleBtnContainer');
+            if (!container) return;
+
+            try {
+                google.accounts.id.initialize({
+                    client_id: '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com',
+                    callback: handleGoogleSignInResponse,
+                    auto_select: false
+                });
+
+                google.accounts.id.renderButton(container, {
+                    type: 'standard',
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'signin_with',
+                    shape: 'rectangular',
+                    logo_alignment: 'left',
+                    width: 320
+                });
+            } catch (e) {
+                console.error('Google Sign-In init error:', e);
+                // Fallback: show a custom button
+                container.innerHTML = '<button type="button" class="google-login-btn" onclick="handleGoogleLoginFallback()" style="width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://developers.google.com/identity/images/g-logo.png" width="20" height="20"> 使用 Google 帳戶登入</button>';
+            }
+        }
+
+        function handleGoogleLoginFallback() {
             google.accounts.id.prompt((notification) => {
                 if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                     showToast('Google 登入視窗無法顯示，請確認瀏覽器已登入 Google 帳號', 'error');
