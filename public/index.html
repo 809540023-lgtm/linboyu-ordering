@@ -1182,7 +1182,7 @@
     </div>
 
     <!-- Google Sign-In Script -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="window.__gsiLoaded=true; if(window.__gsiCallback) window.__gsiCallback();"></script>
 
     <script>
         // Application State
@@ -1850,8 +1850,12 @@
                 });
             });
 
-            // Initialize Google Sign-In and render button via JS
-            initGoogleSignIn();
+            // Initialize Google Sign-In - wait for GSI library to load
+            if (window.__gsiLoaded) {
+                initGoogleSignIn();
+            } else {
+                window.__gsiCallback = function() { initGoogleSignIn(); };
+            }
 
             // Setup logout button
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -1993,6 +1997,10 @@
         }
 
         function handleGoogleLoginFallback() {
+            if (typeof google === 'undefined' || !google.accounts) {
+                showToast('Google 登入服務載入中，請稍後再試', 'error');
+                return;
+            }
             google.accounts.id.prompt((notification) => {
                 if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                     showToast('Google 登入視窗無法顯示，請確認瀏覽器已登入 Google 帳號', 'error');
