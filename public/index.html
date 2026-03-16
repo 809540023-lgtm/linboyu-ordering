@@ -1181,8 +1181,7 @@
         </div>
     </div>
 
-    <!-- Google Sign-In Script -->
-    <script src="https://accounts.google.com/gsi/client" async defer onload="window.__gsiLoaded=true; if(window.__gsiCallback) window.__gsiCallback();"></script>
+    <!-- Google OAuth handled via redirect, no external library needed -->
 
     <script>
         // Application State
@@ -1850,12 +1849,10 @@
                 });
             });
 
-            // Initialize Google Sign-In - wait for GSI library to load
-            if (window.__gsiLoaded) {
-                initGoogleSignIn();
-            } else {
-                window.__gsiCallback = function() { initGoogleSignIn(); };
-            }
+            // Initialize Google Sign-In (redirect-based OAuth)
+            initGoogleSignIn();
+            // Handle OAuth callback if returning from Google
+            handleOAuthCallback();
 
             // Setup logout button
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -1969,59 +1966,58 @@
             });
         }
 
-        var googleTokenClient = null;
+        var GOOGLE_CLIENT_ID = '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com';
+        var GOOGLE_REDIRECT_URI = window.location.origin;
 
         function initGoogleSignIn() {
-            const container = document.getElementById('googleBtnContainer');
+            var container = document.getElementById('googleBtnContainer');
             if (!container) return;
 
-            // Create custom Google button (avoids GSI iframe 0x0 issue)
+            // Create custom Google button - uses standard OAuth redirect (most reliable)
             container.innerHTML = '<button type="button" id="customGoogleBtn" style="width:100%;padding:12px 16px;border:1px solid #dadce0;border-radius:8px;background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.2s;"><img src="https://developers.google.com/identity/images/g-logo.png" width="20" height="20" alt="G"> <span>使用 Google 帳戶登入</span></button>';
 
-            try {
-                // Use OAuth2 token client - opens a real popup window, not an iframe
-                googleTokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: '232284018943-9s7dria0prpjhatj01uhnr4ceum4s0va.apps.googleusercontent.com',
-                    scope: 'email profile',
-                    callback: handleGoogleTokenResponse
-                });
-
-                document.getElementById('customGoogleBtn').addEventListener('click', function() {
-                    if (googleTokenClient) {
-                        googleTokenClient.requestAccessToken();
-                    } else {
-                        showToast('Google 登入服務尚未準備好，請稍後再試', 'error');
-                    }
-                });
-                console.log('Google OAuth2 token client initialized successfully');
-            } catch (e) {
-                console.error('Google OAuth2 init error:', e);
-                document.getElementById('customGoogleBtn').addEventListener('click', function() {
-                    showToast('Google 登入服務載入失敗，請重新整理頁面', 'error');
-                });
-            }
+            document.getElementById('customGoogleBtn').addEventListener('click', function() {
+                // Redirect to Google OAuth consent screen
+                var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth' +
+                    '?client_id=' + encodeURIComponent(GOOGLE_CLIENT_ID) +
+                    '&redirect_uri=' + encodeURIComponent(GOOGLE_REDIRECT_URI) +
+                    '&response_type=token' +
+                    '&scope=' + encodeURIComponent('email profile') +
+                    '&include_granted_scopes=true' +
+                    '&prompt=select_account';
+                window.location.href = authUrl;
+            });
         }
 
-        async function handleGoogleTokenResponse(tokenResponse) {
-            if (tokenResponse.error) {
-                showToast('Google 登入失敗: ' + tokenResponse.error, 'error');
-                return;
-            }
+        function handleOAuthCallback() {
+            // Check if URL hash contains access_token (returning from Google OAuth)
+            var hash = window.location.hash;
+            if (!hash || hash.indexOf('access_token') === -1) return;
 
-            try {
-                // Use access token to get user info from Google
-                const userInfoResp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { 'Authorization': 'Bearer ' + tokenResponse.access_token }
-                });
-                const userInfo = await userInfoResp.json();
+            // Parse the hash fragment
+            var params = {};
+            hash.substring(1).split('&').forEach(function(part) {
+                var kv = part.split('=');
+                params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+            });
 
+            if (!params.access_token) return;
+
+            // Clean up the URL hash
+            history.replaceState(null, '', window.location.pathname);
+
+            // Use access token to get user info from Google, then login
+            fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { 'Authorization': 'Bearer ' + params.access_token }
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(userInfo) {
                 if (!userInfo.email) {
                     showToast('無法取得 Google 帳號資訊', 'error');
                     return;
                 }
-
                 // Send user info to our backend
-                const resp = await fetch('/api/auth/google', {
+                return fetch('/api/auth/google', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2029,10 +2025,11 @@
                         email: userInfo.email,
                         google_id: userInfo.sub
                     })
-                });
-                const data = await resp.json();
-                const result = data.data || data;
-
+                }).then(function(r) { return r.json(); });
+            })
+            .then(function(data) {
+                if (!data) return;
+                var result = data.data || data;
                 if (result.token && result.user) {
                     localStorage.setItem('linboyu_auth_token', result.token);
                     localStorage.setItem('linboyu_user', JSON.stringify(result.user));
@@ -2047,10 +2044,11 @@
                 } else {
                     throw new Error(data.error || data.message || 'Google 登錄失敗');
                 }
-            } catch (error) {
+            })
+            .catch(function(error) {
                 console.error('Google login error:', error);
                 showToast(error.message || 'Google 登錄失敗', 'error');
-            }
+            });
         }
 
         function handleLogout() {
