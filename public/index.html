@@ -1150,12 +1150,12 @@
 
             <!-- Tabs -->
             <div class="login-tabs">
-                <button class="login-tab active" data-tab="login-form">登錄</button>
-                <button class="login-tab" data-tab="register-form">註冊</button>
+                <button type="button" class="login-tab active" data-tab="login-form">登錄</button>
+                <button type="button" class="login-tab" data-tab="register-form">註冊</button>
             </div>
 
             <!-- Login Form -->
-            <form class="login-form active" id="loginForm" data-form="login-form">
+            <div class="login-form active" id="loginForm" data-form="login-form">
                 <!-- Google Sign-In rendered by JS -->
                 <div id="googleBtnContainer" style="display:flex;justify-content:center;min-height:44px;"></div>
 
@@ -1163,21 +1163,21 @@
                     <span>或</span>
                 </div>
 
-                <input type="text" class="login-input" id="loginPhone" placeholder="電話號碼" required>
-                <input type="password" class="login-input" id="loginPassword" placeholder="密碼" required>
+                <input type="tel" class="login-input" id="loginPhone" placeholder="電話號碼">
+                <input type="password" class="login-input" id="loginPassword" placeholder="密碼">
                 <div class="login-error" id="loginError"></div>
-                <button type="submit" class="login-button" id="loginSubmitBtn">登錄</button>
-            </form>
+                <button type="button" class="login-button" id="loginSubmitBtn">登錄</button>
+            </div>
 
             <!-- Register Form -->
-            <form class="login-form" id="registerForm" data-form="register-form">
-                <input type="text" class="login-input" id="registerName" placeholder="姓名" required>
-                <input type="tel" class="login-input" id="registerPhone" placeholder="電話號碼" required>
-                <input type="email" class="login-input" id="registerEmail" placeholder="Email" required>
-                <input type="password" class="login-input" id="registerPassword" placeholder="密碼" required>
+            <div class="login-form" id="registerForm" data-form="register-form">
+                <input type="text" class="login-input" id="registerName" placeholder="姓名">
+                <input type="tel" class="login-input" id="registerPhone" placeholder="電話號碼">
+                <input type="email" class="login-input" id="registerEmail" placeholder="Email">
+                <input type="password" class="login-input" id="registerPassword" placeholder="密碼">
                 <div class="login-error" id="registerError"></div>
-                <button type="submit" class="login-button" id="registerSubmitBtn">註冊</button>
-            </form>
+                <button type="button" class="login-button" id="registerSubmitBtn">註冊</button>
+            </div>
         </div>
     </div>
 
@@ -1822,16 +1822,24 @@
         }
 
         function setupLoginSystem() {
-            // Setup login form submission
-            document.getElementById('loginForm').addEventListener('submit', (e) => {
+            // Setup login button click
+            document.getElementById('loginSubmitBtn').addEventListener('click', (e) => {
                 e.preventDefault();
                 handlePhoneLogin();
             });
 
-            // Setup register form submission
-            document.getElementById('registerForm').addEventListener('submit', (e) => {
+            // Setup register button click
+            document.getElementById('registerSubmitBtn').addEventListener('click', (e) => {
                 e.preventDefault();
                 handleRegister();
+            });
+
+            // Also handle Enter key in login/register fields
+            document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); handlePhoneLogin(); }
+            });
+            document.getElementById('registerPassword').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); handleRegister(); }
             });
 
             // Setup tab switching
