@@ -1150,8 +1150,8 @@
 
             <!-- Tabs -->
             <div class="login-tabs">
-                <button type="button" class="login-tab active" data-tab="login-form">登錄</button>
-                <button type="button" class="login-tab" data-tab="register-form">註冊</button>
+                <button type="button" class="login-tab active" data-tab="login-form" onclick="switchLoginTab('login-form')">登錄</button>
+                <button type="button" class="login-tab" data-tab="register-form" onclick="switchLoginTab('register-form')">註冊</button>
             </div>
 
             <!-- Login Form -->
@@ -1166,7 +1166,7 @@
                 <input type="tel" class="login-input" id="loginPhone" placeholder="電話號碼">
                 <input type="password" class="login-input" id="loginPassword" placeholder="密碼">
                 <div class="login-error" id="loginError"></div>
-                <button type="button" class="login-button" id="loginSubmitBtn">登錄</button>
+                <button type="button" class="login-button" id="loginSubmitBtn" onclick="handlePhoneLogin()">登錄</button>
             </div>
 
             <!-- Register Form -->
@@ -1176,7 +1176,7 @@
                 <input type="email" class="login-input" id="registerEmail" placeholder="Email">
                 <input type="password" class="login-input" id="registerPassword" placeholder="密碼">
                 <div class="login-error" id="registerError"></div>
-                <button type="button" class="login-button" id="registerSubmitBtn">註冊</button>
+                <button type="button" class="login-button" id="registerSubmitBtn" onclick="handleRegister()">註冊</button>
             </div>
         </div>
     </div>
@@ -1819,6 +1819,14 @@
 
             if (nameInput) nameInput.value = user.name;
             if (phoneInput) phoneInput.value = user.phone;
+        }
+
+        // Global tab switching function (called from inline onclick)
+        function switchLoginTab(tabName) {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
+            document.querySelectorAll('.login-form').forEach(form => form.classList.remove('active'));
+            document.querySelector('[data-form="' + tabName + '"]').classList.add('active');
         }
 
         function setupLoginSystem() {
