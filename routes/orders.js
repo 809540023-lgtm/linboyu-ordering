@@ -104,16 +104,34 @@ router.post('/', (req, res) => {
     let subtotal = 0;
     const orderItems = [];
 
+    // Map frontend product IDs (a1,a2,b1,b2...) to DB integer IDs
+    function resolveProductId(pid) {
+      const str = String(pid);
+      // If it's already a plain number
+      if (/^\d+$/.test(str)) return parseInt(str);
+      // Map "a1"→1, "a2"→2, "b1"→1, "b2"→2, etc.
+      const match = str.match(/^[a-z](\d+)$/i);
+      if (match) return parseInt(match[1]);
+      return parseInt(str); // fallback
+    }
+
     for (const item of items) {
-      const product = db.prepare('SELECT * FROM products WHERE id = ?').get(parseInt(item.product_id));
-      if (!product) return res.status(404).json({ error: `品項 ${item.product_id} 不存在` });
+      const dbProductId = resolveProductId(item.product_id);
+      const product = db.prepare('SELECT * FROM products WHERE id = ?').get(dbProductId);
+      if (!product) return res.status(404).json({ error: `品項 ${item.product_id} (解析為 ${dbProductId}) 不存在` });
 
       const qty = parseInt(item.quantity);
       if (qty < 1) return res.status(400).json({ error: '數量必須 >= 1' });
 
-      const inventory = db.prepare('SELECT * FROM daily_inventory WHERE date = ? AND product_id = ?')
+      let inventory = db.prepare('SELECT * FROM daily_inventory WHERE date = ? AND product_id = ?')
         .get(pickup_date, product.id);
-      if (!inventory) return res.status(400).json({ error: `${product.name} 該日期無法供應` });
+      // Auto-create inventory if missing (use product's daily_quota as default)
+      if (!inventory) {
+        db.prepare('INSERT OR IGNORE INTO daily_inventory (date, product_id, total_qty, sold_qty, reserved_qty) VALUES (?, ?, ?, 0, 0)')
+          .run(pickup_date, product.id, product.daily_quota || 20);
+        inventory = db.prepare('SELECT * FROM daily_inventory WHERE date = ? AND product_id = ?')
+          .get(pickup_date, product.id);
+      }
 
       const available = inventory.total_qty - inventory.sold_qty - inventory.reserved_qty;
       if (qty > available) {
