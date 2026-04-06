@@ -1251,12 +1251,16 @@
 
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'calendar-day';
-                dayDiv.dataset.date = date.toISOString().split('T')[0];
+                // Use local date to avoid UTC timezone offset issues
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                dayDiv.dataset.date = `${yyyy}-${mm}-${dd}`;
 
                 const dayName = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
                 const dayNum = date.getDate();
                 const discount = getDiscount(i);
-                const discountText = discount === 0 ? '原價' : `${discount}折`;
+                const discountText = discount === 1 ? '原價' : `${Math.round(discount * 10)}折`;
 
                 dayDiv.innerHTML = `
                     <div class="day-name">週${dayName}</div>
@@ -1816,9 +1820,11 @@
         function prefillUserInfo(user) {
             const nameInput = document.getElementById('customerName');
             const phoneInput = document.getElementById('customerPhone');
+            const emailInput = document.getElementById('customerEmail');
 
-            if (nameInput) nameInput.value = user.name;
-            if (phoneInput) phoneInput.value = user.phone;
+            if (nameInput) nameInput.value = user.name || '';
+            if (phoneInput) phoneInput.value = user.phone || '';
+            if (emailInput) emailInput.value = user.email || '';
         }
 
         // Global tab switching function (called from inline onclick)
@@ -2082,9 +2088,13 @@
             document.querySelector('.container').style.display = 'none';
             document.querySelector('header').style.display = 'none';
 
-            // Reset form inputs
-            document.getElementById('loginForm').reset();
-            document.getElementById('registerForm').reset();
+            // Reset form inputs (forms are divs, so reset manually)
+            document.getElementById('loginPhone').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerPhone').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
             document.getElementById('loginError').classList.remove('show');
             document.getElementById('registerError').classList.remove('show');
 

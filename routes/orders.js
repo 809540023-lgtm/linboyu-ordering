@@ -37,23 +37,29 @@ const { requireAdmin } = require("../middleware/auth");
 // ===== POST /api/orders - 建立訂單 =====
 router.post('/', (req, res) => {
   try {
-    const {
-      customer_name,
-      customer_phone,
-      customer_email,
-      delivery_type,
-      delivery_address,
-      pickup_date,
-      items,
-      discount_code,
-      brand,
-      note,
-      line_user_id
-    } = req.body;
+    const body = req.body;
+
+    // Support both frontend camelCase and snake_case formats
+    const customer_name = body.customer_name || (body.customer && body.customer.name) || null;
+    const customer_phone = body.customer_phone || (body.customer && body.customer.phone) || null;
+    const customer_email = body.customer_email || (body.customer && body.customer.email) || null;
+    const delivery_type = body.delivery_type || body.deliveryType || 'pickup';
+    const delivery_address = body.delivery_address || body.deliveryAddress || null;
+    const pickup_date = body.pickup_date || body.pickupDate || null;
+    const discount_code = body.discount_code || body.discountCode || null;
+    const brand = body.brand || 'ai';
+    const note = body.note || null;
+    const line_user_id = body.line_user_id || body.lineUserId || null;
+
+    // Normalize items: accept both productId and product_id
+    const items = (body.items || []).map(item => ({
+      product_id: item.product_id || item.productId,
+      quantity: item.quantity
+    }));
 
     // ===== 驗證輸入 =====
     if (!customer_name || !customer_phone || !pickup_date || !items || items.length === 0) {
-      return res.status(400).json({ error: '缺少必填欄位' });
+      return res.status(400).json({ error: '缺少必填欄位', debug: { customer_name, customer_phone, pickup_date, itemCount: items.length } });
     }
 
     if (!dayjs(pickup_date).isValid()) {
@@ -171,6 +177,8 @@ router.post('/', (req, res) => {
       res.status(201).json({
         success: true,
         message: '訂單已建立，待支付',
+        orderId: orderId,
+        orderNumber: orderNumber,
         data: {
           order_id: orderId,
           order_number: orderNumber,
