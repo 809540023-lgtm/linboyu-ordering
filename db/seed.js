@@ -23,14 +23,25 @@ async function seed() {
       DELETE FROM sqlite_sequence;
     `);
 
-    // ===== 2. 插入 5 個示例品項 =====
-    console.log('建立示例品項...');
+    // ===== 2. 插入 16 個真實品項（來自 POS 系統） =====
+    console.log('建立品項...');
     const productData = [
-      { code: 'A', name: '（待設定A）', price: 80, cost: 25 },
-      { code: 'B', name: '（待設定B）', price: 90, cost: 28 },
-      { code: 'C', name: '（待設定C）', price: 100, cost: 32 },
-      { code: 'D', name: '（待設定D）', price: 120, cost: 40 },
-      { code: 'E', name: '（待設定E）', price: 150, cost: 50 }
+      { code: 'A1',  name: '德國豬腳單點',         price: 130, cost: 45, emoji: '🍖', category: 'main' },
+      { code: 'A2',  name: '半雞便當',             price: 80,  cost: 28, emoji: '🍗', category: 'main' },
+      { code: 'A3',  name: '全雞便當',             price: 150, cost: 50, emoji: '🐔', category: 'main' },
+      { code: 'A4',  name: '全雞單點',             price: 130, cost: 45, emoji: '🐔', category: 'main' },
+      { code: 'A5',  name: '大雞腿油飯',           price: 100, cost: 35, emoji: '🍗', category: 'main' },
+      { code: 'A6',  name: '雞柳便當',             price: 70,  cost: 22, emoji: '🍱', category: 'main' },
+      { code: 'A7',  name: '大雞腿(100g白飯)',      price: 70,  cost: 22, emoji: '🍗', category: 'main' },
+      { code: 'A8',  name: '單點大雞腿',           price: 65,  cost: 20, emoji: '🍗', category: 'main' },
+      { code: 'A9',  name: '大雞腿便當',           price: 100, cost: 35, emoji: '🍱', category: 'main' },
+      { code: 'A10', name: '單點副菜',             price: 30,  cost: 10, emoji: '🥬', category: 'side' },
+      { code: 'A11', name: '半筋半肉牛肉燴飯',     price: 80,  cost: 28, emoji: '🥩', category: 'main' },
+      { code: 'A12', name: '德國豬腳',             price: 130, cost: 45, emoji: '🍖', category: 'main' },
+      { code: 'A13', name: '米香烏龍',             price: 35,  cost: 10, emoji: '🍵', category: 'drink' },
+      { code: 'A14', name: '青茶',                 price: 35,  cost: 10, emoji: '🍵', category: 'drink' },
+      { code: 'A15', name: '綠茶',                 price: 35,  cost: 10, emoji: '🍵', category: 'drink' },
+      { code: 'A16', name: '沐.紅茶',              price: 35,  cost: 10, emoji: '🫖', category: 'drink' }
     ];
 
     const insertProduct = db.prepare(`
@@ -39,14 +50,16 @@ async function seed() {
     `);
 
     productData.forEach((p, idx) => {
+      const desc = p.category === 'drink' ? '冷/熱飲品' :
+                   p.category === 'side' ? '時蔬副菜' :
+                   '主食餐點';
       insertProduct.run(
-        p.code, p.name,
-        '白飯80g + 主食 + 時蔬2樣 + 例湯',
+        p.code, p.name, desc,
         p.price, p.cost,
-        18, '🍱', 'active', idx
+        20, p.emoji, 'active', idx
       );
     });
-    console.log('✅ 已建立 5 個品項\n');
+    console.log(`✅ 已建立 ${productData.length} 個品項\n`);
 
     // ===== 3. 插入預設折扣碼 =====
     console.log('建立折扣碼...');

@@ -1323,32 +1323,46 @@
 
         // Products
         function fetchProducts() {
-            // Simulate API response with mock data
+            // Real menu from POS system (guji5)
+            const POS_IMG = 'https://www.guji5.com.tw:8989/images/';
+            const menuItems = [
+                { id: 'a1',  name: '德國豬腳單點',       emoji: '🍖', price: 130, category: 'main', image: POS_IMG+'2026051304438c954b6b-59dc-4e42-9a34-9fd0ab66f7d8_min.jpg' },
+                { id: 'a2',  name: '半雞便當',           emoji: '🍗', price: 80,  category: 'main', image: POS_IMG+'202605130508c5d4eb20-f450-42d6-be01-34c0c46adbe8_min.jpg' },
+                { id: 'a3',  name: '全雞便當',           emoji: '🐔', price: 150, category: 'main', image: POS_IMG+'2026051305083f0d4479-79a1-4c65-9fd9-c42624f5dba4_min.jpg' },
+                { id: 'a4',  name: '全雞單點',           emoji: '🐔', price: 130, category: 'main', image: POS_IMG+'2026051305073f2221e5-2562-4b58-a1bd-858c7d9aa714_min.jpg' },
+                { id: 'a5',  name: '大雞腿油飯',         emoji: '🍗', price: 100, category: 'main', image: POS_IMG+'20260513050303c9124d-925f-45a9-8b12-9bff5b15f182_min.jpg' },
+                { id: 'a6',  name: '雞柳便當',           emoji: '🍱', price: 70,  category: 'main', image: POS_IMG+'202605130504ddc66518-006c-43e5-8717-cab874efc5b9_min.jpg' },
+                { id: 'a7',  name: '大雞腿(100g白飯)',    emoji: '🍗', price: 70,  category: 'main', image: POS_IMG+'20260513050121c0bcd2-b49b-4f5a-99d8-83602954bce9_min.jpg' },
+                { id: 'a8',  name: '單點大雞腿',         emoji: '🍗', price: 65,  category: 'main', image: POS_IMG+'2026051304499b31c2cc-7010-4a7d-aa99-26d57795a392_min.jpg' },
+                { id: 'a9',  name: '大雞腿便當',         emoji: '🍱', price: 100, category: 'main', image: POS_IMG+'202605130450d475ef51-75b7-43bd-9287-9fb5b3a43d01_min.jpg' },
+                { id: 'a10', name: '單點副菜',           emoji: '🥬', price: 30,  category: 'side', image: POS_IMG+'202605130450a1015428-7a50-464d-9de0-425f3aff2df8_min.jpg' },
+                { id: 'a11', name: '半筋半肉牛肉燴飯',   emoji: '🥩', price: 80,  category: 'main', image: POS_IMG+'2026051304430e9ec2b2-0e2b-4e8e-ae7a-410316c949de_min.jpg' },
+                { id: 'a12', name: '德國豬腳',           emoji: '🍖', price: 130, category: 'main', image: POS_IMG+'2026051304438c954b6b-59dc-4e42-9a34-9fd0ab66f7d8_min.jpg' },
+                { id: 'a13', name: '米香烏龍',           emoji: '🍵', price: 35,  category: 'drink', image: POS_IMG+'20260512165121cffa0a-7b3a-4d23-8feb-9946a8b04559_min.jpg' },
+                { id: 'a14', name: '青茶',               emoji: '🍵', price: 35,  category: 'drink', image: POS_IMG+'20260512165121cffa0a-7b3a-4d23-8feb-9946a8b04559_min.jpg' },
+                { id: 'a15', name: '綠茶',               emoji: '🍵', price: 35,  category: 'drink', image: POS_IMG+'20260512165121cffa0a-7b3a-4d23-8feb-9946a8b04559_min.jpg' },
+                { id: 'a16', name: '沐.紅茶',            emoji: '🫖', price: 35,  category: 'drink', image: POS_IMG+'20260512165121cffa0a-7b3a-4d23-8feb-9946a8b04559_min.jpg' }
+            ];
+
             appState.products = {
-                fithouse: [
-                    { id: 'a1', name: 'A雞肉便當', emoji: '🍗', price: 80, category: 'main' },
-                    { id: 'a2', name: 'B健身餐', emoji: '💪', price: 95, category: 'main' },
-                    { id: 'a3', name: 'C沙拉套餐', emoji: '🥗', price: 85, category: 'main' },
-                    { id: 'a4', name: 'D海鮮便當', emoji: '🦐', price: 120, category: 'main' },
-                    { id: 'a5', name: 'E牛肉套餐', emoji: '🥩', price: 150, category: 'main' }
-                ],
-                linboyuai: [
-                    { id: 'b1', name: 'A和牛丼飯', emoji: '🍖', price: 120, category: 'main' },
-                    { id: 'b2', name: 'B豚骨拉麵', emoji: '🍜', price: 95, category: 'main' },
-                    { id: 'b3', name: 'C握壽司盤', emoji: '🍣', price: 150, category: 'main' },
-                    { id: 'b4', name: 'D天婦羅定食', emoji: '🍤', price: 125, category: 'main' },
-                    { id: 'b5', name: 'E親子丼', emoji: '🍚', price: 100, category: 'main' }
-                ]
+                fithouse: menuItems.map(item => ({...item})),
+                linboyuai: menuItems.map(item => ({...item, id: item.id.replace('a', 'b')}))
             };
 
             updateProducts();
         }
 
         function fetchInventory(dateStr) {
-            // Simulate API response with mock data
+            // Default inventory: 20 per item per day
+            const inv = {};
+            const menuIds = ['a1','a2','a3','a4','a5','a6','a7','a8','a9','a10','a11','a12','a13','a14','a15','a16'];
+            menuIds.forEach(id => { inv[id] = 20; });
+            const invB = {};
+            menuIds.forEach(id => { invB[id.replace('a','b')] = 20; });
+
             appState.inventory = {
-                fithouse: { a1: 15, a2: 10, a3: 20, a4: 8, a5: 5 },
-                linboyuai: { b1: 12, b2: 18, b3: 6, b4: 9, b5: 14 }
+                fithouse: inv,
+                linboyuai: invB
             };
 
             updateProducts();
@@ -1370,7 +1384,9 @@
                 card.className = 'product-card';
 
                 card.innerHTML = `
-                    <div class="product-emoji">${product.emoji}</div>
+                    <div class="product-emoji">${product.image
+                        ? `<img src="${product.image}" alt="${product.name}" style="width:80px;height:62px;object-fit:cover;border-radius:8px;" onerror="this.outerHTML='${product.emoji}'">`
+                        : product.emoji}</div>
                     <div class="product-name">${product.name}</div>
                     <div class="product-price">NT$${product.price}</div>
                     <div class="product-qty ${available === 0 ? 'unavailable' : ''}">
