@@ -1071,6 +1071,10 @@
                 <div class="products-section">
                     <div class="products-title">🎯 選擇商品</div>
                     <div class="products-grid" id="productsGrid"></div>
+
+                    <!-- 加購區 -->
+                    <div class="products-title" style="margin-top:20px;">➕ 加購項目</div>
+                    <div class="products-grid" id="addonsGrid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));"></div>
                 </div>
             </div>
 
@@ -1123,21 +1127,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">付款方式 *</label>
+                    <label class="form-label">付款方式</label>
                     <div class="payment-methods" id="paymentMethods">
-                        <div class="payment-method selected" data-method="newebpay">
-                            💳 Newebpay
-                        </div>
-                        <div class="payment-method" data-method="linepay">
-                            💚 LINE Pay
+                        <div class="payment-method selected" data-method="cash">
+                            💰 現場付款
                         </div>
                     </div>
+                    <div style="color:#888;font-size:12px;margin-top:4px;">取餐時現場付款即可</div>
                 </div>
             </form>
 
             <div class="modal-button-group">
                 <button class="modal-btn cancel" id="cancelCheckoutBtn">取消</button>
-                <button class="modal-btn confirm" id="confirmCheckoutBtn">確認並付款</button>
+                <button class="modal-btn confirm" id="confirmCheckoutBtn">確認訂單</button>
             </div>
         </div>
     </div>
@@ -1193,7 +1195,7 @@
             inventory: {},
             discountCode: null,
             discountAmount: 0,
-            selectedPaymentMethod: 'newebpay'
+            selectedPaymentMethod: 'cash'
         };
 
         const BRAND_CONFIG = {
@@ -1344,6 +1346,22 @@
                 { id: 'a16', name: '沐.紅茶',            emoji: '🫖', price: 35,  category: 'drink', image: POS_IMG+'20260512165121cffa0a-7b3a-4d23-8feb-9946a8b04559_min.jpg' }
             ];
 
+            // 加購選項（from POS 餐點作法）
+            const addOnItems = [
+                { id: 'addon_tea',    name: '加購當日飲料(青茶)', price: 10, emoji: '🍵' },
+                { id: 'addon_rice',   name: '加購白飯 100g',     price: 50, emoji: '🍚' },
+                { id: 'addon_coconut',name: '加椰果',            price: 10, emoji: '🥥' },
+                { id: 'addon_qtiao',  name: '加Q條',             price: 10, emoji: '🧋' }
+            ];
+
+            // 飲料甜度選項
+            const sugarOptions = ['正常糖','五分糖','三分糖','一分糖','無糖'];
+            // 飲料冰量選項
+            const iceOptions = ['正常冰','少冰','去冰','溫','熱'];
+
+            appState.addOnItems = addOnItems;
+            appState.sugarOptions = sugarOptions;
+            appState.iceOptions = iceOptions;
             appState.products = {
                 fithouse: menuItems.map(item => ({...item})),
                 linboyuai: menuItems.map(item => ({...item, id: item.id.replace('a', 'b')}))
@@ -1383,6 +1401,12 @@
                 const card = document.createElement('div');
                 card.className = 'product-card';
 
+                const isDrink = product.category === 'drink';
+                const sugarOpts = isDrink ? (appState.sugarOptions || []).map(s =>
+                    `<option value="${s}">${s}</option>`).join('') : '';
+                const iceOpts = isDrink ? (appState.iceOptions || []).map(s =>
+                    `<option value="${s}">${s}</option>`).join('') : '';
+
                 card.innerHTML = `
                     <div class="product-emoji">${product.image
                         ? `<img src="${product.image}" alt="${product.name}" style="width:80px;height:62px;object-fit:cover;border-radius:8px;" onerror="this.outerHTML='${product.emoji}'">`
@@ -1392,6 +1416,15 @@
                     <div class="product-qty ${available === 0 ? 'unavailable' : ''}">
                         ${available > 0 ? `剩餘 ${available} 份` : '已售完'}
                     </div>
+                    ${isDrink ? `
+                    <div style="display:flex;gap:4px;margin:4px 0;font-size:12px;">
+                        <select id="sugar_${product.id}" style="flex:1;padding:3px;border-radius:6px;border:1px solid #ddd;font-size:12px;">
+                            ${sugarOpts}
+                        </select>
+                        <select id="ice_${product.id}" style="flex:1;padding:3px;border-radius:6px;border:1px solid #ddd;font-size:12px;">
+                            ${iceOpts}
+                        </select>
+                    </div>` : ''}
                     <div class="qty-control">
                         <button class="qty-btn" data-id="${product.id}" onclick="decreaseQty('${product.id}')">−</button>
                         <input type="number" class="qty-input" value="${cartQty}" min="0" data-id="${product.id}" onchange="updateQtyFromInput('${product.id}')">
@@ -1407,6 +1440,38 @@
                 `;
 
                 grid.appendChild(card);
+            });
+
+            // 渲染加購區
+            renderAddons();
+        }
+
+        function renderAddons() {
+            const addonsGrid = document.getElementById('addonsGrid');
+            if (!addonsGrid || !appState.addOnItems) return;
+            addonsGrid.innerHTML = '';
+            const config = BRAND_CONFIG[appState.selectedBrand];
+
+            appState.addOnItems.forEach(addon => {
+                const cartQty = appState.cart[addon.id] || 0;
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.style.cssText = 'padding:10px;';
+                card.innerHTML = `
+                    <div class="product-emoji" style="font-size:28px;">${addon.emoji}</div>
+                    <div class="product-name" style="font-size:13px;">${addon.name}</div>
+                    <div class="product-price" style="font-size:14px;">+NT$${addon.price}</div>
+                    <div class="qty-control" style="margin-top:6px;">
+                        <button class="qty-btn" onclick="decreaseQty('${addon.id}')">−</button>
+                        <input type="number" class="qty-input" value="${cartQty}" min="0" data-id="${addon.id}" onchange="updateQtyFromInput('${addon.id}')">
+                        <button class="qty-btn" onclick="increaseQty('${addon.id}', 99)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn ${config.buttonClass}" style="font-size:12px;padding:6px;"
+                            onclick="addToCart('${addon.id}', '${addon.name}', ${addon.price}, 99)">
+                        加購
+                    </button>
+                `;
+                addonsGrid.appendChild(card);
             });
         }
 
@@ -1446,6 +1511,18 @@
 
             if (qty > 0 && qty <= available) {
                 appState.cart[productId] = qty;
+
+                // 如果是飲料，儲存甜度和冰量
+                const sugarEl = document.getElementById('sugar_' + productId);
+                const iceEl = document.getElementById('ice_' + productId);
+                if (sugarEl || iceEl) {
+                    if (!appState.cartOptions) appState.cartOptions = {};
+                    appState.cartOptions[productId] = {
+                        sugar: sugarEl ? sugarEl.value : '正常糖',
+                        ice: iceEl ? iceEl.value : '正常冰'
+                    };
+                }
+
                 updateCart();
                 showToast(`已加入 ${productName} × ${qty}`, 'success');
             }
@@ -1472,14 +1549,24 @@
             let html = '<div class="cart-items">';
 
             Object.entries(appState.cart).forEach(([productId, qty]) => {
-                const product = products.find(p => p.id === productId);
+                // 先找正常品項
+                let product = products.find(p => p.id === productId);
+                // 再找加購品項
+                if (!product && appState.addOnItems) {
+                    product = appState.addOnItems.find(p => p.id === productId);
+                }
                 if (product) {
                     const lineTotal = product.price * qty;
                     subtotal += lineTotal;
 
+                    // 飲料選項標註
+                    const opts = appState.cartOptions && appState.cartOptions[productId];
+                    const optLabel = opts ? `<div style="font-size:11px;color:#888;">${opts.sugar} / ${opts.ice}</div>` : '';
+                    const isAddon = productId.startsWith('addon_');
+
                     html += `
                         <div class="cart-item">
-                            <div class="cart-item-name">${product.name}</div>
+                            <div class="cart-item-name">${isAddon ? '➕ ' : ''}${product.name}${optLabel}</div>
                             <div class="cart-item-qty">× ${qty}</div>
                             <div class="cart-item-price">NT$${lineTotal}</div>
                             <div class="cart-item-remove" onclick="removeFromCart('${productId}')">✕</div>
@@ -1715,28 +1802,55 @@
 
             // Prepare order data
             const products = appState.products[appState.selectedBrand];
-            const items = Object.entries(appState.cart).map(([productId, qty]) => {
-                const product = products.find(p => p.id === productId);
-                return {
+            const items = [];
+            const addons = [];
+            let subtotal = 0;
+
+            Object.entries(appState.cart).forEach(([productId, qty]) => {
+                const isAddon = productId.startsWith('addon_');
+                let product = products.find(p => p.id === productId);
+                if (!product && appState.addOnItems) {
+                    product = appState.addOnItems.find(p => p.id === productId);
+                }
+                if (!product) return;
+
+                const opts = appState.cartOptions && appState.cartOptions[productId];
+                const entry = {
                     productId,
                     quantity: qty,
-                    price: product.price
+                    price: product.price,
+                    ...(opts ? { sugar: opts.sugar, ice: opts.ice } : {})
                 };
+
+                if (isAddon) {
+                    addons.push(entry);
+                } else {
+                    items.push(entry);
+                }
+                subtotal += product.price * qty;
             });
 
             const discount = getDiscount(getDaysAhead(appState.selectedDate));
-            let subtotal = 0;
-            items.forEach(item => {
-                subtotal += item.price * item.quantity;
-            });
-
             const discountAmount = Math.round(subtotal * (1 - discount)) + appState.discountAmount;
             const total = subtotal - discountAmount;
+
+            // 組合備註：飲料選項 + 加購
+            const noteLines = [];
+            items.forEach(item => {
+                if (item.sugar || item.ice) {
+                    const p = products.find(pp => pp.id === item.productId);
+                    noteLines.push(`${p ? p.name : item.productId}: ${item.sugar}/${item.ice}`);
+                }
+            });
+            addons.forEach(a => {
+                const p = appState.addOnItems.find(pp => pp.id === a.productId);
+                noteLines.push(`加購: ${p ? p.name : a.productId} ×${a.quantity}`);
+            });
 
             const orderData = {
                 brand: appState.selectedBrand,
                 pickupDate: appState.selectedDate,
-                items,
+                items: items,
                 customer: {
                     name,
                     phone,
@@ -1746,10 +1860,11 @@
                 subtotal,
                 discount: discountAmount,
                 total,
-                paymentMethod: appState.selectedPaymentMethod
+                paymentMethod: 'cash',
+                note: noteLines.length > 0 ? noteLines.join('；') : null
             };
 
-            // Create order
+            // Create order (現場付款模式)
             fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1757,38 +1872,43 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.orderId) {
-                    // Initiate payment
-                    const paymentEndpoint = appState.selectedPaymentMethod === 'newebpay'
-                        ? '/api/payments/newebpay/create'
-                        : '/api/payments/linepay/create';
-
-                    return fetch(paymentEndpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            orderId: data.orderId,
-                            amount: total,
-                            customerEmail: email
-                        })
-                    });
+                if (data.orderId || data.orderNumber) {
+                    // 訂單成功 - 現場付款
+                    showToast(`訂單已成立！訂單編號：${data.orderNumber || data.orderId}，取餐時現場付款`, 'success');
+                    appState.cart = {};
+                    updateCartDisplay();
+                    document.getElementById('checkoutModal').classList.remove('active');
+                    // 顯示訂單完成頁
+                    showOrderConfirmation(data);
                 } else {
-                    throw new Error('訂單建立失敗');
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.paymentUrl) {
-                    window.location.href = data.paymentUrl;
-                } else {
-                    throw new Error('付款初始化失敗');
+                    throw new Error(data.error || '訂單建立失敗');
                 }
             })
             .catch(error => {
                 showToast(error.message || '訂單處理失敗，請重試', 'error');
                 confirmBtn.disabled = false;
-                confirmBtn.textContent = '確認並付款';
+                confirmBtn.textContent = '確認訂單';
             });
+        }
+
+        function showOrderConfirmation(data) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `
+                <div style="background:white;border-radius:16px;padding:30px;max-width:400px;width:90%;text-align:center;">
+                    <div style="font-size:48px;margin-bottom:10px;">✅</div>
+                    <h2 style="color:#2ecc71;margin-bottom:10px;">訂單已成立！</h2>
+                    <div style="background:#f8f9fa;border-radius:10px;padding:15px;margin:15px 0;text-align:left;">
+                        <p style="margin:5px 0;"><strong>訂單編號：</strong>${data.orderNumber || data.data?.order_number || ''}</p>
+                        <p style="margin:5px 0;"><strong>金額：</strong>NT$${data.data?.total_amount || ''}</p>
+                        ${data.data?.discount_label && data.data.discount_label !== '原價' ? `<p style="margin:5px 0;"><strong>折扣：</strong>${data.data.discount_label} (-NT$${data.data.discount_amount || 0})</p>` : ''}
+                        <p style="margin:5px 0;"><strong>付款方式：</strong>💰 現場付款</p>
+                    </div>
+                    <p style="color:#888;font-size:14px;">取餐時現場付款即可，感謝您的訂購！</p>
+                    <button onclick="this.closest('div[style]').remove()" style="margin-top:15px;padding:12px 40px;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;border:none;border-radius:25px;font-size:16px;cursor:pointer;">好的</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         function showToast(message, type = 'success') {
